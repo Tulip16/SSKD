@@ -4,11 +4,11 @@ import os
 import os.path
 import numpy as np
 import sys
-import hashlib
+
 import pickle
 import torch
 import torch.utils.data as data
-from typing import Any, Callable, List, Iterable, Optional, TypeVar, Dict, IO, Tuple, Iterator
+import download_utils
 
 from itertools import permutations
 
@@ -171,33 +171,22 @@ class CIFAR10(VisionDataset):
 
     def __len__(self):
         return len(self.data)
-    
-    def calculate_md5(self, fpath: str, chunk_size: int = 1024 * 1024) -> str:
-        md5 = hashlib.md5()
-        with open(fpath, "rb") as f:
-            for chunk in iter(lambda: f.read(chunk_size), b""):
-                md5.update(chunk)
-        return md5.hexdigest()
-
-
-    def check_md5(self, fpath: str, md5: str, **kwargs: Any) -> bool:
-        return md5 == self.calculate_md5(fpath, **kwargs)
 
     def _check_integrity(self):
         root = self.root
         for fentry in (self.train_list + self.test_list):
             filename, md5 = fentry[0], fentry[1]
             fpath = os.path.join(root, self.base_folder, filename)
-            if not self.check_md5(fpath, md5):
+            if not check_integrity(fpath, md5):
                 return False
         return True
 
     def download(self):
         import tarfile
 
-#         if self._check_integrity():
-#             print('Files already downloaded and verified')
-#             return
+        if self._check_integrity():
+            print('Files already downloaded and verified')
+            return
 
         download_url(self.url, self.root, self.filename, self.tgz_md5)
 
@@ -211,7 +200,6 @@ class CIFAR10(VisionDataset):
 
 class CIFAR100(CIFAR10):
     """`CIFAR100 <https://www.cs.toronto.edu/~kriz/cifar.html>`_ Dataset.
-
     This is a subclass of the `CIFAR10` Dataset.
     """
     base_folder = 'cifar-100-python'
