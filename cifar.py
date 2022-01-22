@@ -8,7 +8,7 @@ import sys
 import pickle
 import torch
 import torch.utils.data as data
-import download_utils
+from torchvision.datasets.utils import *
 
 from itertools import permutations
 
