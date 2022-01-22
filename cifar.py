@@ -81,7 +81,7 @@ class CIFAR10(VisionDataset):
     }
 
     def __init__(self, root, train=True,
-                 transform=None, download=False):
+                 transform=None, download=True):
 
         super(CIFAR10, self).__init__(root)
         self.transform = transform
@@ -89,8 +89,11 @@ class CIFAR10(VisionDataset):
         self.train = train  # training set or test set
 
         if download:
-            raise ValueError('cannot download.')
-            exit()
+            try:
+                self.download()
+            except:
+                raise ValueError('cannot download.')
+                exit()
             #self.download()
 
         #if not self._check_integrity():
