@@ -172,7 +172,7 @@ class CIFAR10(VisionDataset):
     def __len__(self):
         return len(self.data)
     
-    def calculate_md5(fpath: str, chunk_size: int = 1024 * 1024) -> str:
+    def calculate_md5(self, fpath: str, chunk_size: int = 1024 * 1024) -> str:
         md5 = hashlib.md5()
         with open(fpath, "rb") as f:
             for chunk in iter(lambda: f.read(chunk_size), b""):
@@ -180,15 +180,15 @@ class CIFAR10(VisionDataset):
         return md5.hexdigest()
 
 
-    def check_md5(fpath: str, md5: str, **kwargs: Any) -> bool:
-        return md5 == calculate_md5(fpath, **kwargs)
+    def check_md5(self, fpath: str, md5: str, **kwargs: Any) -> bool:
+        return md5 == self.calculate_md5(fpath, **kwargs)
 
     def _check_integrity(self):
         root = self.root
         for fentry in (self.train_list + self.test_list):
             filename, md5 = fentry[0], fentry[1]
             fpath = os.path.join(root, self.base_folder, filename)
-            if not check_md5(fpath, md5):
+            if not self.check_md5(fpath, md5):
                 return False
         return True
 
