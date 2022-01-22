@@ -195,9 +195,9 @@ class CIFAR10(VisionDataset):
     def download(self):
         import tarfile
 
-        if self._check_integrity():
-            print('Files already downloaded and verified')
-            return
+#         if self._check_integrity():
+#             print('Files already downloaded and verified')
+#             return
 
         download_url(self.url, self.root, self.filename, self.tgz_md5)
 
