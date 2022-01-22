@@ -87,7 +87,8 @@ valset = CIFAR100('./data', train=False, transform=transform_test)
 train_loader = DataLoader(trainset, batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=False)
 val_loader = DataLoader(valset, batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=False)
 
-ckpt_path = osp.join(args.t_path, 'ckpt/best.pth')
+# ckpt_path = osp.join(args.t_path, 'ckpt/best.pth')
+ckpt_path = './experiments/'+t_arch+'.pth'
 t_model = model_dict[t_arch](num_classes=100).cuda()
 state_dict = torch.load(ckpt_path)['state_dict']
 t_model.load_state_dict(state_dict)
