@@ -8,7 +8,7 @@ import hashlib
 import pickle
 import torch
 import torch.utils.data as data
-from typing import Any, Callable, List, Iterable, Optional, TypeVar, Dict, IO, Tuple, 
+from typing import Any, Callable, List, Iterable, Optional, TypeVar, Dict, IO, Tuple, Iterator
 
 from itertools import permutations
 
