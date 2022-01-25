@@ -310,10 +310,15 @@ for epoch in range(args.epoch):
         lelam = LearnSoftMultiLambdaMeta(train_loader, val_loader, s_model, num_cls, N, criterion_nored, \
                                 device,  fit, \
                                 t_model, criterion, temp)
-        lambdas, lambda_ss, lambda_t = lelam.get_lambdas(optimizer.param_groups[0]['lr'],lambdas)
-        lambdas = None
-        lambdas_ss = None
-        lambdas_t = None
+
+        Nteacher = 1 # check
+        lambdas = torch.ones(len(trainset), Nteacher+1)*(args.kd_weight/(args.kd_weight + args.ce_weight))
+        lambdas_ss = torch.ones(len(trainset), Nteacher)*args.ss_weight
+        lambdas_t = torch.ones(len(trainset), Nteacher)*args.tf_weight
+        lambdas, lambdas_ss, lambdas_t = lelam.get_lambdas(optimizer.param_groups[0]['lr'],lambdas, lambdas_ss, lambdas_t)
+        # lambdas = None
+        # lambdas_ss = None
+        # lambdas_t = None
         loss1 = F.cross_entropy(output[nor_index], target, reduction='none')
         loss2 = F.kl_div(log_nor_output, nor_knowledge, reduction='none') * args.kd_T * args.kd_T
         loss3 = F.kl_div(log_aug_output[distill_index_tf], aug_knowledge[distill_index_tf], \
@@ -322,6 +327,7 @@ for epoch in range(args.epoch):
                         reduction='none') * args.ss_T * args.ss_T
 
         loss = lambdas[indices,0]*loss1
+        
         for m in range(Nteacher):
             loss += lambdas[indices,m+1]*loss2
             loss += lambdas_ss[indices,m]*loss3
