@@ -100,7 +100,7 @@ class WideResNet(nn.Module):
 
         return [bn1, bn2, bn3]
 
-    def forward(self, x, is_feat=False, preact=False):
+    def forward(self, x, is_feat=False, preact=False, last=True):
         out = self.conv1(x)
         f0 = out
         out = self.block1(out)
@@ -121,6 +121,8 @@ class WideResNet(nn.Module):
                 f3 = self.bn1(f3)
             return [f0, f1, f2, f3, f4], out
         else:
+            if last:
+                return out, f4
             return out
 
 
