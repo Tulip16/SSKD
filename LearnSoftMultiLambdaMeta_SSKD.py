@@ -79,7 +79,7 @@ class LearnSoftMultiLambdaMeta(object):
             for batch_idx, (inputs, targets, _) in enumerate(self.valloader):
                 inputs, targets = inputs.to(self.device), targets.to(self.device, non_blocking=True)
                 if batch_idx == 0:
-                    out, l1 = self.model(inputs, last=True, freeze=True)
+                    out, l1 = self.model(inputs)
                     self.init_out = out
                     self.init_l1 = l1
                     self.y_val = targets  # .view(-1, 1)
