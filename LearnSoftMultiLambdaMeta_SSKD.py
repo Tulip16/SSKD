@@ -79,13 +79,13 @@ class LearnSoftMultiLambdaMeta(object):
             for batch_idx, (inputs, targets, _) in enumerate(self.valloader):
                 inputs, targets = inputs.to(self.device), targets.to(self.device, non_blocking=True)
                 if batch_idx == 0:
-                    out, l1 = self.model(inputs)
+                    out, l1, _, _ = self.model(inputs)
                     self.init_out = out
                     self.init_l1 = l1
                     self.y_val = targets  # .view(-1, 1)
                     tea_out_val = self.teacher_model[-1](inputs)
                 else:
-                    out, l1 = self.model(inputs, last=True, freeze=True)
+                    out, l1, _, _ = self.model(inputs)
                     self.init_out = torch.cat((self.init_out, out), dim=0)
                     self.init_l1 = torch.cat((self.init_l1, l1), dim=0)
                     self.y_val = torch.cat((self.y_val, targets), dim=0)
@@ -120,7 +120,7 @@ class LearnSoftMultiLambdaMeta(object):
 
             inputs, target = inputs.to(self.device), target.to(self.device, non_blocking=True)
 
-            outputs, l1 = self.model(inputs, last=True, freeze=True)
+            outputs, l1, _, _ = self.model(inputs)
             
             loss_SL = self.criterion_red(outputs, target)  # self.criterion(outputs, target).sum()
 
