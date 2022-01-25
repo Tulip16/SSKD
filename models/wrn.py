@@ -119,6 +119,8 @@ class WideResNet(nn.Module):
                 f1 = self.block2.layer[0].bn1(f1)
                 f2 = self.block3.layer[0].bn1(f2)
                 f3 = self.bn1(f3)
+            if last:
+                return [f0, f1, f2, f3, f4], out, f4
             return [f0, f1, f2, f3, f4], out
         else:
             if last:
