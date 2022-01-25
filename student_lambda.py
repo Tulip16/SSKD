@@ -290,14 +290,6 @@ for epoch in range(args.epoch):
         log_simi = F.log_softmax(s_simi / args.ss_T, dim=1)
         simi_knowledge = F.softmax(t_simi / args.ss_T, dim=1)
 
-        cached_state_dictT = copy.deepcopy(s_model.state_dict())
-        #cached_state_dict = copy.deepcopy(ema_model.state_dict())
-        clone_dict = copy.deepcopy(s_model.state_dict())
-        #if self.configdata['ds_strategy']['type'] in ['MultiLam']:
-        lelam.update_model(clone_dict)
-        #ema_model.load_state_dict(cached_state_dict)
-        s_model.load_state_dict(cached_state_dictT)
-
         # get lambdas 
         num_cls = 100
         N = 0 # dead variable
@@ -307,6 +299,14 @@ for epoch in range(args.epoch):
         temp = 1
         criterion = nn.CrossEntropyLoss()
         # criterion_nored = nn.CrossEntropyLoss(reduction='none')
+
+        cached_state_dictT = copy.deepcopy(s_model.state_dict())
+        #cached_state_dict = copy.deepcopy(ema_model.state_dict())
+        clone_dict = copy.deepcopy(s_model.state_dict())
+        #if self.configdata['ds_strategy']['type'] in ['MultiLam']:
+        lelam.update_model(clone_dict)
+        #ema_model.load_state_dict(cached_state_dict)
+        s_model.load_state_dict(cached_state_dictT)
         lelam = LearnSoftMultiLambdaMeta(train_loader, val_loader, s_model, num_cls, N, criterion_nored, \
                                 device,  fit, \
                                 t_model, criterion, temp)
