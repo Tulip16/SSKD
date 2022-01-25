@@ -108,7 +108,7 @@ logger = SummaryWriter(osp.join(exp_path, 'events'))
 acc_record = AverageMeter()
 loss_record = AverageMeter()
 start = time.time()
-for x, target in val_loader:
+for x, target, _ in val_loader:
 
     x = x[:,0,:,:,:].cuda()
     target = target.cuda()
