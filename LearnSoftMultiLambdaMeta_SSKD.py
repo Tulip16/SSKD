@@ -69,9 +69,9 @@ class LearnSoftMultiLambdaMeta(object):
         batch_wise_indices = list(self.trainloader.batch_sampler)
         #eta =0.1
 
-        lambdas = lam.cuda(1)#, device=self.device)
-        lambdas_ss = lam_ss.cuda(1)#, device=self.device)
-        lambdas_t = lam_t.cuda(1)#, device=self.device)
+        lambdas = lam.cuda(0)#, device=self.device)
+        lambdas_ss = lam_ss.cuda(0)#, device=self.device)
+        lambdas_t = lam_t.cuda(0)#, device=self.device)
         soft_lam = F.softmax(lambdas, dim=1)
 
         with torch.no_grad():
