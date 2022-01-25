@@ -299,7 +299,10 @@ for epoch in range(args.epoch):
         temp = 1
         criterion = nn.CrossEntropyLoss()
         # criterion_nored = nn.CrossEntropyLoss(reduction='none')
-
+        lelam = LearnSoftMultiLambdaMeta(train_loader, val_loader, s_model, num_cls, N, criterion_nored, \
+                                device,  fit, \
+                                t_model, criterion, temp)
+        
         cached_state_dictT = copy.deepcopy(s_model.state_dict())
         #cached_state_dict = copy.deepcopy(ema_model.state_dict())
         clone_dict = copy.deepcopy(s_model.state_dict())
@@ -307,9 +310,7 @@ for epoch in range(args.epoch):
         lelam.update_model(clone_dict)
         #ema_model.load_state_dict(cached_state_dict)
         s_model.load_state_dict(cached_state_dictT)
-        lelam = LearnSoftMultiLambdaMeta(train_loader, val_loader, s_model, num_cls, N, criterion_nored, \
-                                device,  fit, \
-                                t_model, criterion, temp)
+            
 
         Nteacher = 1 # check
         lambdas = torch.ones(len(trainset), Nteacher+1)*(args.kd_weight/(args.kd_weight + args.ce_weight))
