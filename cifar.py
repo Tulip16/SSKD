@@ -166,7 +166,7 @@ class CIFAR10(VisionDataset):
 
         img = torch.stack([img0,img1,img2,img3])
 
-        return img, target
+        return img, target, index
 
 
     def __len__(self):
