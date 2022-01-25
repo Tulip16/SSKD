@@ -18,7 +18,7 @@ class wrapper(nn.Module):
 
     def forward(self, x, bb_grad=True):
         
-        feats, out = self.backbone(x, is_feat=True)
+        feats, out, _ = self.backbone(x, is_feat=True)
         feat = feats[-1].view(feats[-1].size(0), -1)
         if not bb_grad:
             feat = feat.detach()
