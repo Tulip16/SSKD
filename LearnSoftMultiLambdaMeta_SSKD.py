@@ -168,11 +168,11 @@ class LearnSoftMultiLambdaMeta(object):
                 nor_index = (torch.arange(4*batch) % 4 == 0).cuda()
                 aug_index = (torch.arange(4*batch) % 4 != 0).cuda()
 
-                output, l1, _, s_feat = self.model(x, bb_grad=True)
+                output, l1, s_feat, _ = self.model(x, bb_grad=True)
                 # log_nor_output = F.log_softmax(output[nor_index] / args.kd_T, dim=1)
                 log_aug_output = F.log_softmax(output[aug_index] / self.temp_T, dim=1)
                 with torch.no_grad():
-                    knowledge, _, _, t_feat = self.teacher_model[m](x)
+                    knowledge, _, t_feat, _ = self.teacher_model[m](x)
                     # nor_knowledge = F.softmax(knowledge[nor_index] / args.kd_T, dim=1)
                     aug_knowledge = F.softmax(knowledge[aug_index] / self.temp_T, dim=1)
                     
