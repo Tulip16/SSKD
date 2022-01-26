@@ -114,9 +114,9 @@ class LearnSoftMultiLambdaMeta(object):
             self.y_val = self.y_val.cuda(0)
             tea_out_val = tea_out_val.cuda(0)
 
-        KD_grads = [0 for _ in self.num_teachers]
-        grad_t = [0 for _ in self.num_teachers]
-        grad_ss = [0 for _ in self.num_teachers]
+        KD_grads = [0]*self.num_teachers
+        grad_t = [0]*self.num_teachers
+        grad_ss = [0]*self.num_teachers
 
         c_temp = self.temp
         for batch_idx, (inputs, target,indices) in enumerate(self.trainloader):
