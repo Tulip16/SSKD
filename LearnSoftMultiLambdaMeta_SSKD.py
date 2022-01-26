@@ -80,6 +80,7 @@ class LearnSoftMultiLambdaMeta(object):
                 print(inputs.size())
                 inputs, targets = inputs.to(self.device), targets.to(self.device, non_blocking=True)
                 print(inputs.size())
+                inputs = inputs[:,0,:,:,:].cuda()
                 if batch_idx == 0:
                     out, l1, _, _ = self.model(inputs)
                     self.init_out = out
@@ -122,6 +123,8 @@ class LearnSoftMultiLambdaMeta(object):
             #batch_wise_indices = list(self.trainloader.batch_sampler)
 
             inputs, target = inputs.to(self.device), target.to(self.device, non_blocking=True)
+            c,h,w = inputs.size()[-3:]
+            inputs = inputs.view(-1,c,h,w).cuda()
 
             outputs, l1, _, _ = self.model(inputs)
             
