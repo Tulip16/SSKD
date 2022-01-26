@@ -113,7 +113,7 @@ for x, target, _ in val_loader:
     x = x[:,0,:,:,:].cuda()
     target = target.cuda()
     with torch.no_grad():
-        output, _, feat = t_model(x)
+        output, _, _, feat = t_model(x)
         loss = F.cross_entropy(output, target)
 
     batch_acc = accuracy(output, target, topk=(1,))[0]
@@ -140,7 +140,7 @@ for epoch in range(args.t_epoch):
         c,h,w = x.size()[-3:]
         x = x.view(-1, c, h, w)
 
-        _, rep, feat = t_model(x, bb_grad=False)
+        _, _, rep, feat = t_model(x, bb_grad=False)
         batch = int(x.size(0) / 4)
         nor_index = (torch.arange(4*batch) % 4 == 0).cuda()
         aug_index = (torch.arange(4*batch) % 4 != 0).cuda()
@@ -179,7 +179,7 @@ for epoch in range(args.t_epoch):
         x = x.view(-1, c, h, w)
 
         with torch.no_grad():
-            _, rep, feat = t_model(x)
+            _, _, rep, feat = t_model(x)
         batch = int(x.size(0) / 4)
         nor_index = (torch.arange(4*batch) % 4 == 0).cuda()
         aug_index = (torch.arange(4*batch) % 4 != 0).cuda()
@@ -243,11 +243,11 @@ for epoch in range(args.epoch):
         nor_index = (torch.arange(4*batch) % 4 == 0).cuda()
         aug_index = (torch.arange(4*batch) % 4 != 0).cuda()
 
-        output, s_feat, _ = s_model(x, bb_grad=True)
+        output, _, s_feat, _ = s_model(x, bb_grad=True)
         log_nor_output = F.log_softmax(output[nor_index] / args.kd_T, dim=1)
         log_aug_output = F.log_softmax(output[aug_index] / args.tf_T, dim=1)
         with torch.no_grad():
-            knowledge, t_feat, _ = t_model(x)
+            knowledge, _, t_feat, _ = t_model(x)
             nor_knowledge = F.softmax(knowledge[nor_index] / args.kd_T, dim=1)
             aug_knowledge = F.softmax(knowledge[aug_index] / args.tf_T, dim=1)
 
@@ -371,7 +371,7 @@ for epoch in range(args.epoch):
         x = x[:,0,:,:,:].cuda()
         target = target.cuda()
         with torch.no_grad():
-            output, _, feat = s_model(x)
+            output, _, _, feat = s_model(x)
             loss = F.cross_entropy(output, target)
 
         batch_acc = accuracy(output, target, topk=(1,))[0]
