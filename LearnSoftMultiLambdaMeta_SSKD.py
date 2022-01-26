@@ -86,13 +86,13 @@ class LearnSoftMultiLambdaMeta(object):
                     self.init_out = out
                     self.init_l1 = l1
                     self.y_val = targets  # .view(-1, 1)
-                    tea_out_val, _, _, _ = self.teacher_model[-1](inputs)
+                    tea_out_val, _, _, _ = self.teacher_model(inputs)
                 else:
                     out, l1, _, _ = self.model(inputs)
                     self.init_out = torch.cat((self.init_out, out), dim=0)
                     self.init_l1 = torch.cat((self.init_l1, l1), dim=0)
                     self.y_val = torch.cat((self.y_val, targets), dim=0)
-                    tea_out_val_temp, _, _, _ = self.teacher_model[-1](inputs)
+                    tea_out_val_temp, _, _, _ = self.teacher_model(inputs)
                     tea_out_val = torch.cat((tea_out_val, tea_out_val_temp), dim=0)
 
             # val_loss_SL = self.criterion_red(self.init_out,self.y_val)
