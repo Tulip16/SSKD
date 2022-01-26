@@ -108,10 +108,10 @@ class LearnSoftMultiLambdaMeta(object):
             # val_loss_KD = self.temp*self.temp*nn.KLDivLoss(reduction='batchmean')(F.log_softmax(self.init_out / self.temp, dim=1),\
             #    F.softmax(tea_out_val / self.temp, dim=1))
 
-            self.init_out = self.init_out.cuda(1)
-            self.init_l1 = self.init_l1.cuda(1)
-            self.y_val = self.y_val.cuda(1)
-            tea_out_val = tea_out_val.cuda(1)
+            self.init_out = self.init_out.cuda(0)
+            self.init_l1 = self.init_l1.cuda(0)
+            self.y_val = self.y_val.cuda(0)
+            tea_out_val = tea_out_val.cuda(0)
 
         KD_grads = [0 for _ in range(len(self.teacher_model))]
         grad_t = [0 for _ in range(len(self.teacher_model))]
