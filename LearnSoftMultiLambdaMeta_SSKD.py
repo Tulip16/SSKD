@@ -77,6 +77,7 @@ class LearnSoftMultiLambdaMeta(object):
         with torch.no_grad():
 
             for batch_idx, (inputs, targets, _) in enumerate(self.valloader):
+                print(inputs.size())
                 inputs, targets = inputs.to(self.device), targets.to(self.device, non_blocking=True)
                 print(inputs.size())
                 if batch_idx == 0:
