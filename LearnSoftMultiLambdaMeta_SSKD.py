@@ -49,6 +49,7 @@ class LearnSoftMultiLambdaMeta(object):
         self.temp_SS = 0.5
         self.ratio_ss = 0.75
         self.ratio_tf = 1
+        self.num_teachers = 1
         print(N_trn)
 
     def update_model(self, model_params):
@@ -113,9 +114,9 @@ class LearnSoftMultiLambdaMeta(object):
             self.y_val = self.y_val.cuda(0)
             tea_out_val = tea_out_val.cuda(0)
 
-        KD_grads = [0 for _ in range(len(self.teacher_model))]
-        grad_t = [0 for _ in range(len(self.teacher_model))]
-        grad_ss = [0 for _ in range(len(self.teacher_model))]
+        KD_grads = [0 for _ in self.num_teachers]
+        grad_t = [0 for _ in self.num_teachers]
+        grad_ss = [0 for _ in self.num_teachers]
 
         c_temp = self.temp
         for batch_idx, (inputs, target,indices) in enumerate(self.trainloader):
@@ -149,7 +150,7 @@ class LearnSoftMultiLambdaMeta(object):
                 SL_grads = torch.cat((SL_grads, torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
                 batch_ind.extend(list(indices))#batch_wise_indices[batch_idx])
 
-            for m in range(len(self.teacher_model)):
+            for m in range(self.num_teachers):
                 with torch.no_grad():
                     teacher_outputs, _, _, _ = self.teacher_model[m](inputs)
                 loss_KD = self.temp * self.temp * nn.KLDivLoss(reduction='batchmean')(
@@ -166,7 +167,7 @@ class LearnSoftMultiLambdaMeta(object):
                     KD_grads[m] = torch.cat((KD_grads[m], torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
 
             ''' T and SS components of the loss '''
-            for m in range(len(self.teacher_model)):
+            for m in range(self.num_teachers):
                 c,h,w = inputs.size()[-3:]
                 x = inputs.view(-1,c,h,w).cuda()
 
@@ -254,7 +255,7 @@ class LearnSoftMultiLambdaMeta(object):
                     comb_grad = soft_lam[batch_ind,0][:,None]*SL_grads 
                     #comb_grad = lambdas[batch_ind,0][:,None]*SL_grads 
                     
-                    for m in range(len(self.teacher_model)):
+                    for m in range(self.num_teachers):
                         comb_grad += soft_lam[batch_ind,m+1][:,None]*KD_grads[m]
                         #comb_grad += lambdas[batch_ind,m+1][:,None]*KD_grads[m]
 
@@ -303,16 +304,16 @@ class LearnSoftMultiLambdaMeta(object):
 
                     grad = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*SL_grads
                     #grad = SL_grads 
-                    for m_1 in range(len(self.teacher_model)):
+                    for m_1 in range(self.num_teachers):
                         grad -= (soft_lam[batch_ind,0]*soft_lam[batch_ind,m_1+1])[:,None]*KD_grads[m_1]
                         #grad -= KD_grads[m_1]
                     alpha_grads = torch.matmul(grad,combined)
                     lambdas[batch_ind,0] = lambdas[batch_ind,0] +  500*eta*alpha_grads #9*eta*
                     
-                    for m in range(len(self.teacher_model)):
+                    for m in range(self.num_teachers):
                         grad = (-soft_lam[batch_ind,0]*soft_lam[batch_ind,m+1])[:,None]*SL_grads 
                         #grad = -SL_grads 
-                        for m_1 in range(len(self.teacher_model)):
+                        for m_1 in range(self.num_teachers):
                             if m_1 == m:
                                 grad += ((1-soft_lam[batch_ind,m_1+1])*soft_lam[batch_ind,m_1+1])[:,None]*KD_grads[m_1]
                                 #grad += KD_grads[m_1]
