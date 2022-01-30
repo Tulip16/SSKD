@@ -128,16 +128,18 @@ class LearnSoftMultiLambdaMeta(object):
             inputs = inputs.view(-1,c,h,w).cuda()
 
             outputs, l1, i_, _ = self.model(inputs)
-            custom_target=torch.zeros_like(outputs,dtype=torch.long)
-            for i in range(targets.size()[0]):
-                custom_target[i][target[i]]=1
-                custom_target[i+64][target[i]]=1
-                custom_target[i+128][target[i]]=1
-                custom_target[i+196][target[i]]=1
+            custom_target=torch.cat(target,target)
+            custom_target=torch.cat(custom_target,custom_target)
+            
+            # for i in range(targets.size()[0]):
+            #     custom_target[i][target[i]]=1
+            #     custom_target[i+64][target[i]]=1
+            #     custom_target[i+128][target[i]]=1
+            #     custom_target[i+196][target[i]]=1
 
 
-            outputs= torch.argmax(outputs, dim=1)
-            custom_target = torch.argmax(custom_target, dim=1)
+
+
             print(outputs.size())
             #print(outputs)
             #print(custom_target)
