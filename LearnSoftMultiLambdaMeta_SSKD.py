@@ -128,7 +128,7 @@ class LearnSoftMultiLambdaMeta(object):
             inputs = inputs.view(-1,c,h,w).cuda()
 
             outputs, l1, i_, _ = self.model(inputs)
-            custom_target=torch.cat((target,target,dim=0))
+            custom_target=torch.cat((target,target),dim=0)
             custom_target=torch.cat((custom_target,custom_target),dim=0)
             
             # for i in range(targets.size()[0]):
