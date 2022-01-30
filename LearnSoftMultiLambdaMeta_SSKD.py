@@ -135,6 +135,9 @@ class LearnSoftMultiLambdaMeta(object):
                 custom_target[i+128][target[i]]=1
                 custom_target[i+196][target[i]]=1
 
+
+            outputs= torch.argmax(outputs, dim=1)
+            custom_target = torch.argmax(custom_target, dim=1)
             print(outputs.size())
             #print(outputs)
             #print(custom_target)
