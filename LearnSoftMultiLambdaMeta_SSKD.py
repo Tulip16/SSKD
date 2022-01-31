@@ -259,9 +259,9 @@ class LearnSoftMultiLambdaMeta(object):
                 
                 print('loss T', loss_T)
                 print('loss SS', loss_SS)
-                print(torch.autograd.grad(loss_SS, output, allow_unused=True, retain_graph=True))
-                print(torch.autograd.grad(loss_SS, output, allow_unused=True, retain_graph=True)[0])
-                l0_grads = (torch.autograd.grad(loss_SS, output,allow_unused=True, retain_graph=True)[0]).detach().clone().cuda(0)
+                print(torch.autograd.grad(loss_SS, s_feat, allow_unused=True, retain_graph=True))
+                print(torch.autograd.grad(loss_SS, s_feat, allow_unused=True, retain_graph=True)[0])
+                l0_grads = (torch.autograd.grad(loss_SS, s_feat,allow_unused=True, retain_graph=True)[0]).detach().clone().cuda(0)
                 l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                 l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
