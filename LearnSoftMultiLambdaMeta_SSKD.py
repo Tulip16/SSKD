@@ -140,10 +140,10 @@ class LearnSoftMultiLambdaMeta(object):
 
 
 
-            print(outputs.size())
+            # print(outputs.size())
             #print(outputs)
             #print(custom_target)
-            print(custom_target.size())
+            # print(custom_target.size())
             #print(i_.size())
             #print(_.size())
 
