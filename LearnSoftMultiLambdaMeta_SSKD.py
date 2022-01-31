@@ -256,6 +256,7 @@ class LearnSoftMultiLambdaMeta(object):
                 else:
                     grad_t[m] = torch.cat((grad_t[m], torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
                 
+                print(grad_t)
                 print('loss T', loss_T)
                 print('loss SS', loss_SS)
                 l0_grads = (torch.autograd.grad(loss_SS, output,allow_unused=True)[0]).detach().clone().cuda(0)
