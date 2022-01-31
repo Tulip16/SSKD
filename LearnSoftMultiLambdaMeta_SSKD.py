@@ -150,7 +150,7 @@ class LearnSoftMultiLambdaMeta(object):
             
             loss_SL = self.criterion_red(outputs, custom_target)  # self.criterion(outputs, target).sum()
 
-            l0_grads = (torch.autograd.grad(loss_SL, outputs)[0]).detach().clone().cuda(0)
+            l0_grads = (torch.autograd.grad(loss_SL, outputs, retain_graph=True)[0]).detach().clone().cuda(0)
             l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
             l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
@@ -176,7 +176,7 @@ class LearnSoftMultiLambdaMeta(object):
                     F.log_softmax(outputs / self.temp, dim=1), \
                     F.softmax(teacher_outputs / self.temp, dim=1))
 
-                l0_grads = (torch.autograd.grad(loss_KD, outputs)[0]).detach().clone().cuda(0)
+                l0_grads = (torch.autograd.grad(loss_KD, outputs, retain_graph=True)[0]).detach().clone().cuda(0)
                 l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                 l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
@@ -247,7 +247,7 @@ class LearnSoftMultiLambdaMeta(object):
                     log_simi[distill_index_ss], \
                     simi_knowledge[distill_index_ss])
 
-                l0_grads = (torch.autograd.grad(loss_T, output)[0]).detach().clone().cuda(0)
+                l0_grads = (torch.autograd.grad(loss_T, output, retain_graph=True)[0]).detach().clone().cuda(0)
                 l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                 l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
@@ -259,8 +259,8 @@ class LearnSoftMultiLambdaMeta(object):
                 
                 print('loss T', loss_T)
                 print('loss SS', loss_SS)
-                print(torch.autograd.grad(loss_SS, output))
-                print(torch.autograd.grad(loss_SS, output)[0])
+                print(torch.autograd.grad(loss_SS, output, ,allow_unused=True, retain_graph=True))
+                print(torch.autograd.grad(loss_SS, output, ,allow_unused=True, retain_graph=True)[0])
                 l0_grads = (torch.autograd.grad(loss_SS, output,allow_unused=True)[0]).detach().clone().cuda(0)
                 l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                 l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
