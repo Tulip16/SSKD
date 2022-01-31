@@ -259,21 +259,21 @@ class LearnSoftMultiLambdaMeta(object):
                 else:
                     grad_t[m] = torch.cat((grad_t[m], torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
                 
-                
+            
                 print('loss T', loss_T)
                 print('loss SS', loss_SS)
 #                 print(torch.autograd.grad(loss_SS, s_feat, allow_unused=True, retain_graph=True))
 #                 print(torch.autograd.grad(loss_SS, s_feat, allow_unused=True, retain_graph=True)[0])
                 l0_grads = (torch.autograd.grad(loss_SS, s_feat,allow_unused=True, retain_graph=True)[0]).detach().clone().cuda(0)
                 print('SS - l0 grads shape', l0_grads.shape)
-                l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
-                print('SS after - l0 grads shape', l0_grads.shape)
-                l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
+                l0_expand = torch.repeat_interleave(l0_grads, self.num_classes+1, dim=1)
+#                 print('SS after - l0 grads shape', l0_grads.shape)
+#                 l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
                 if batch_idx % self.fit == 0:
-                    grad_ss[m] = torch.cat((l0_grads, l1_grads), dim=1)
+                    grad_ss[m] = l0_expand
                 else:
-                    grad_ss[m] = torch.cat((grad_ss[m], torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
+                    grad_ss[m] = torch.cat((grad_ss[m], l0_expand), dim=0)
                 
             
             if (batch_idx + 1) % self.fit == 0 or batch_idx + 1 == len(self.trainloader):
