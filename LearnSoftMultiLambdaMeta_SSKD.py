@@ -258,7 +258,7 @@ class LearnSoftMultiLambdaMeta(object):
                 
 
                 l0_grads = (torch.autograd.grad(loss_SS, s_feat,allow_unused=True)[0]).detach().clone().cuda(0)
-                l0_expand = torch.repeat_interleave(l0_grads, self.num_classes+1, dim=1)[:(l1.shape[1]+1)*self.num_classes]
+                l0_expand = l0_grads.repeat(1, self.num_classes).cuda(0)
 
                 if batch_idx % self.fit == 0:
                     grad_ss[m] = l0_expand
@@ -301,6 +301,7 @@ class LearnSoftMultiLambdaMeta(object):
                     l0_expand = torch.repeat_interleave(l0_grads, self.init_l1.shape[1], dim=1)
                     l1_grads = l0_expand * self.init_l1.repeat(1, self.num_classes).cuda(0)
                     up_grads_val = torch.cat((l0_grads, l1_grads), dim=1).sum(0)
+                    up_grads_val_ss = init_l1.repeat(1, self.num_classes).cuda(0).sum(0)
 
                     out_vec = train_out - (eta * comb_grad[:self.num_classes].view(1, -1).expand(train_out.shape[0], -1))
 
@@ -318,8 +319,10 @@ class LearnSoftMultiLambdaMeta(object):
                     l0_expand = torch.repeat_interleave(l0_grads, train_l1.shape[1], dim=1)
                     l1_grads = l0_expand * train_l1.repeat(1, self.num_classes).cuda(0)
                     up_grads = torch.cat((l0_grads, l1_grads), dim=1).sum(0)
+                    up_grads_ss = train_l1.repeat(1, self.num_classes).cuda(0).sum(0)
 
                     combined = (0.75*up_grads_val+0.25*up_grads).T
+                    combined_ss = (0.75*up_grads_ss_val+0.25*up_grads_ss).T
 
                     grad = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*SL_grads
                     #grad = SL_grads 
@@ -340,7 +343,7 @@ class LearnSoftMultiLambdaMeta(object):
                                 grad -= (soft_lam[batch_ind,m+1]*soft_lam[batch_ind,m_1+1])[:,None]*KD_grads[m_1]
                                 #grad -= KD_grads[m_1]
                         alpha_grads = torch.matmul(grad,combined)
-                        alpha_grads_ss = torch.matmul(grad_ss, combined)
+                        alpha_grads_ss = torch.matmul(grad_ss, combined_ss)
                         alpha_grads_t = torch.matmul(grad_t, combined)
                         lambdas[batch_ind,m+1] = lambdas[batch_ind,m+1] +  500*eta*alpha_grads #9*eta*
                         lambdas_ss[batch_ind,m+1] = lambdas_ss[batch_ind,m+1] +  500*eta*alpha_grads_ss #9*eta*
