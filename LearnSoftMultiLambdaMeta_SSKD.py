@@ -270,7 +270,8 @@ class LearnSoftMultiLambdaMeta(object):
 
                 for r in range(10):
                     #print("Before",lambdas[batch_ind[0]].item(),lambdas[batch_ind[-1]].item())
-                    
+                    print("soft lam", soft_lam[batch_ind,0][:,None].size())
+                    print("SL_grads", SL_grads.size())
                     comb_grad = soft_lam[batch_ind,0][:,None]*SL_grads 
                     #comb_grad = lambdas[batch_ind,0][:,None]*SL_grads 
                     
