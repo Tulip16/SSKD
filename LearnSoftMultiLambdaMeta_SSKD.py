@@ -127,7 +127,7 @@ class LearnSoftMultiLambdaMeta(object):
             # inputs = inputs[:,0,:,:,:].cuda()
             c,h,w = inputs.size()[-3:]
             inputs = inputs.view(-1,c,h,w).cuda()
-            inputs = inputs[0:4:-1,:,:,:]
+            inputs = inputs[::4,:,:,:]
             # print("input for SL grads after tranformation", inputs.size())
 
             outputs, l1, i_, _ = self.model(inputs)
