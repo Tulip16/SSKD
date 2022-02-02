@@ -309,7 +309,7 @@ class LearnSoftMultiLambdaMeta(object):
                     l0_expand = torch.repeat_interleave(l0_grads, self.init_l1.shape[1], dim=1)
                     l1_grads = l0_expand * self.init_l1.repeat(1, self.num_classes).cuda(0)
                     up_grads_val = torch.cat((l0_grads, l1_grads), dim=1).sum(0)
-                    up_grads_val_ss = init_l1.repeat(1, self.num_classes).cuda(0).sum(0)
+                    up_grads_val_ss = self.init_l1.repeat(1, self.num_classes).cuda(0).sum(0)
 
                     out_vec = train_out - (eta * comb_grad[:self.num_classes].view(1, -1).expand(train_out.shape[0], -1))
 
