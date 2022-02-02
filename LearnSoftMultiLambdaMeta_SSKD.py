@@ -207,8 +207,11 @@ class LearnSoftMultiLambdaMeta(object):
                     knowledge, _, t_feat, _ = self.teacher_model(x)
                     # nor_knowledge = F.softmax(knowledge[nor_index] / args.kd_T, dim=1)
                     aug_knowledge = F.softmax(knowledge[aug_index] / self.temp_T, dim=1)
-                    
+                
+                print(target.size())
                 aug_target = target.unsqueeze(1).expand(-1,3).contiguous().view(-1).long().cuda()
+                print(aug_target.size())
+                print(aug_knowledge.size())
                 rank = torch.argsort(aug_knowledge, dim=1, descending=True)
                 rank = torch.argmax(torch.eq(rank, aug_target.unsqueeze(1)).long(), dim=1)  # groundtruth label's rank
                 index = torch.argsort(rank)
