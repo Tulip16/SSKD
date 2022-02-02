@@ -316,7 +316,7 @@ class LearnSoftMultiLambdaMeta(object):
                     out_vec = out_vec - (eta * torch.matmul(train_l1, comb_grad[self.num_classes:].\
                         view(self.num_classes, -1).transpose(0, 1)))
 
-                    out_vec.requires_grad = True
+                    # out_vec.requires_grad = True
 
                     loss_SL = self.criterion_red(out_vec, train_target)  # self.criterion(outputs, target).sum()
 
