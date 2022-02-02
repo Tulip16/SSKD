@@ -122,16 +122,16 @@ class LearnSoftMultiLambdaMeta(object):
         for batch_idx, (inputs, target,indices) in enumerate(self.trainloader):
 
             #batch_wise_indices = list(self.trainloader.batch_sampler)
-            print("input for SL grads before tranformation", inputs.size())
+            # print("input for SL grads before tranformation", inputs.size())
             inputs, target = inputs.to(self.device), target.to(self.device, non_blocking=True)
-            c,h,w = inputs.size()[-3:]
-            inputs = inputs.view(-1,c,h,w).cuda()
-            print("input for SL grads after tranformation", inputs.size())
+            # c,h,w = inputs.size()[-3:]
+            # inputs = inputs.view(-1,c,h,w).cuda()
+            # print("input for SL grads after tranformation", inputs.size())
 
             outputs, l1, i_, _ = self.model(inputs)
-            custom_target=torch.cat((target,target),dim=0)
-            custom_target=torch.cat((custom_target,custom_target),dim=0)
-            print("outputs sz", outputs.size())
+            # custom_target=torch.cat((target,target),dim=0)
+            # custom_target=torch.cat((custom_target,custom_target),dim=0)
+            # print("outputs sz", outputs.size())
             
             # for i in range(targets.size()[0]):
             #     custom_target[i][target[i]]=1
@@ -150,7 +150,7 @@ class LearnSoftMultiLambdaMeta(object):
             #print(_.size())
 
             
-            loss_SL = self.criterion_red(outputs, custom_target)  # self.criterion(outputs, target).sum()
+            loss_SL = self.criterion_red(outputs, target)  # self.criterion(outputs, target).sum()
 
             l0_grads = (torch.autograd.grad(loss_SL, outputs)[0]).detach().clone().cuda(0)
             l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
@@ -191,6 +191,8 @@ class LearnSoftMultiLambdaMeta(object):
             for m in range(self.num_teachers):
                 c,h,w = inputs.size()[-3:]
                 x = inputs.view(-1,c,h,w).cuda()
+                # _, num_transformations, _, _, _ = inputs.size()
+                # x = inputs[:,1:num_trasformations,:,:,:]
 
                 batch = int(x.size(0) / 4)
                 nor_index = (torch.arange(4*batch) % 4 == 0).cuda()
