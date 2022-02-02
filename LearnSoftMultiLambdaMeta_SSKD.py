@@ -122,14 +122,16 @@ class LearnSoftMultiLambdaMeta(object):
         for batch_idx, (inputs, target,indices) in enumerate(self.trainloader):
 
             #batch_wise_indices = list(self.trainloader.batch_sampler)
-
+            print("input for SL grads before tranformation", inputs.size())
             inputs, target = inputs.to(self.device), target.to(self.device, non_blocking=True)
             c,h,w = inputs.size()[-3:]
             inputs = inputs.view(-1,c,h,w).cuda()
+            print("input for SL grads after tranformation", inputs.size())
 
             outputs, l1, i_, _ = self.model(inputs)
             custom_target=torch.cat((target,target),dim=0)
             custom_target=torch.cat((custom_target,custom_target),dim=0)
+            print("outputs sz", outputs.size())
             
             # for i in range(targets.size()[0]):
             #     custom_target[i][target[i]]=1
