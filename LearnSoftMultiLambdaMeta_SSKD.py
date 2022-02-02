@@ -330,7 +330,7 @@ class LearnSoftMultiLambdaMeta(object):
                     up_grads_ss = train_l1.repeat(1, self.num_classes).cuda(0).sum(0)
 
                     combined = (0.75*up_grads_val+0.25*up_grads).T
-                    combined_ss = (0.75*up_grads_ss_val+0.25*up_grads_ss).T
+                    combined_ss = (0.75*up_grads_val_ss+0.25*up_grads_ss).T
 
                     grad = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*SL_grads
                     #grad = SL_grads 
