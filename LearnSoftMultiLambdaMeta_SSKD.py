@@ -207,12 +207,9 @@ class LearnSoftMultiLambdaMeta(object):
                     knowledge, _, t_feat, _ = self.teacher_model(x)
                     # nor_knowledge = F.softmax(knowledge[nor_index] / args.kd_T, dim=1)
                     aug_knowledge = F.softmax(knowledge[aug_index] / self.temp_T, dim=1)
-                
-                print(target.size())
+          
                 special_target = target[::4] # might be target[:target.size()[0]/4]
                 aug_target = special_target.unsqueeze(1).expand(-1,3).contiguous().view(-1).long().cuda()
-                print(aug_target.size())
-                print(aug_knowledge.size())
                 rank = torch.argsort(aug_knowledge, dim=1, descending=True)
                 rank = torch.argmax(torch.eq(rank, aug_target.unsqueeze(1)).long(), dim=1)  # groundtruth label's rank
                 index = torch.argsort(rank)
@@ -297,7 +294,7 @@ class LearnSoftMultiLambdaMeta(object):
                     out_vec_val = out_vec_val - (eta * torch.matmul(self.init_l1, comb_grad[self.num_classes:].\
                         view(self.num_classes, -1).transpose(0, 1)))
 
-                    out_vec_val.requires_grad = True
+                    #out_vec_val.requires_grad = True
                     '''loss_SL_val = self.criterion_red(out_vec_val, self.y_val)  # self.criterion(outputs, target).sum()
 
                     l0_grads = (torch.autograd.grad(loss_SL_val, out_vec_val)[0]).detach().clone().cuda(1)'''
