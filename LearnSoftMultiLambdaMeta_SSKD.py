@@ -209,7 +209,8 @@ class LearnSoftMultiLambdaMeta(object):
                     aug_knowledge = F.softmax(knowledge[aug_index] / self.temp_T, dim=1)
                 
                 print(target.size())
-                aug_target = target.unsqueeze(1).expand(-1,3).contiguous().view(-1).long().cuda()
+                special_target = target[::4] # might be target[:target.size()[0]/4]
+                aug_target = special_target.unsqueeze(1).expand(-1,3).contiguous().view(-1).long().cuda()
                 print(aug_target.size())
                 print(aug_knowledge.size())
                 rank = torch.argsort(aug_knowledge, dim=1, descending=True)
