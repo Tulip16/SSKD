@@ -124,6 +124,7 @@ class LearnSoftMultiLambdaMeta(object):
             #batch_wise_indices = list(self.trainloader.batch_sampler)
             # print("input for SL grads before tranformation", inputs.size())
             inputs, target = inputs.to(self.device), target.to(self.device, non_blocking=True)
+            inputs = inputs[:,0,:,:,:].cuda()
             # c,h,w = inputs.size()[-3:]
             # inputs = inputs.view(-1,c,h,w).cuda()
             # print("input for SL grads after tranformation", inputs.size())
