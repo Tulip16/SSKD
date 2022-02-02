@@ -295,7 +295,7 @@ for epoch in range(args.epoch):
         N = 0 # dead variable
         criterion_nored = None # dead variable
         device = 0 # check
-        fit = 10 # check
+        fit = 5 # check
         temp = 1
         criterion = nn.CrossEntropyLoss()
         # criterion_nored = nn.CrossEntropyLoss(reduction='none')
