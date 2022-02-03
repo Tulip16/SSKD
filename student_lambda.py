@@ -313,7 +313,7 @@ for epoch in range(args.epoch):
             
 
         Nteacher = 1 # check
-        lambdas = torch.ones(len(trainset), Nteacher)*(args.kd_weight/(args.kd_weight + args.ce_weight))
+        lambdas = torch.ones(len(trainset), Nteacher+1)*(args.kd_weight/(args.kd_weight + args.ce_weight))
         lambdas_ss = torch.ones(len(trainset), Nteacher)*args.ss_weight
         lambdas_t = torch.ones(len(trainset), Nteacher)*args.tf_weight
         print("lambda size", lambdas.size())
