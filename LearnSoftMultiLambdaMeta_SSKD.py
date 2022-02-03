@@ -363,8 +363,8 @@ class LearnSoftMultiLambdaMeta(object):
                         alpha_grads_ss = torch.matmul(grad_ss, combined_ss)
                         alpha_grads_t = torch.matmul(grad_t, combined)
                         lambdas[batch_ind,m+1] = lambdas[batch_ind,m+1] +  500*eta*alpha_grads #9*eta*
-                        lambdas_ss[batch_ind,m+1] = lambdas_ss[batch_ind,m+1] +  500*eta*alpha_grads_ss #9*eta*
-                        lambdas_t[batch_ind,m+1] = lambdas_t[batch_ind,m+1] +  500*eta*alpha_grads_t #9*eta*
+                        lambdas_ss[batch_ind,m] = lambdas_ss[batch_ind,m] +  500*eta*alpha_grads_ss #9*eta*
+                        lambdas_t[batch_ind,m] = lambdas_t[batch_ind,m] +  500*eta*alpha_grads_t #9*eta*
                     #print("After",lambdas[batch_ind[0]].item(),lambdas[batch_ind[-1]].item())
                     #lambdas.clamp_(min=1e-7,max=1-1e-7)
                     soft_lam[batch_ind] = F.softmax(lambdas[batch_ind], dim=1)
