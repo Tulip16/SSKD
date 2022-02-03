@@ -351,6 +351,7 @@ class LearnSoftMultiLambdaMeta(object):
                                 grad -= (soft_lam[batch_ind,m+1]*soft_lam[batch_ind,m_1+1])[:,None]*KD_grads[m_1]
                                 #grad -= KD_grads[m_1]
                         grad_ss = torch.stack((grad_ss))
+                        grad_t = torch.stack((grad_t))
                         print("_____________________________")
                         print(type(grad))
                         print(type(grad_ss))
