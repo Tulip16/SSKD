@@ -74,6 +74,8 @@ class LearnSoftMultiLambdaMeta(object):
         lambdas_ss = lam_ss.cuda(0)#, device=self.device)
         lambdas_t = lam_t.cuda(0)#, device=self.device)
         soft_lam = F.softmax(lambdas, dim=1)
+        soft_lam_ss = F.softmax(lambdas_ss, dim=1)
+        soft_lam_t = F.softmax(lambdas_t, dim=1)
 
         with torch.no_grad():
 
@@ -280,13 +282,21 @@ class LearnSoftMultiLambdaMeta(object):
                     print("soft lam", soft_lam[batch_ind,0][:,None].size())
                     print("SL_grads", SL_grads.size())
                     comb_grad = soft_lam[batch_ind,0][:,None]*SL_grads 
-                    #comb_grad = lambdas[batch_ind,0][:,None]*SL_grads 
+                    #comb_grad = lambdas[batch_ind,0][:,None]*SL_grads
+                    #comb_grad_t = soft_lam_t[batch_ind,0][:,None]*grad_t[0]
+                    #comb_grad_ss = soft_lam_ss[batch_ind,0][:,None]*grad_ss[0]
                     
                     for m in range(self.num_teachers):
                         comb_grad += soft_lam[batch_ind,m+1][:,None]*KD_grads[m]
                         #comb_grad += lambdas[batch_ind,m+1][:,None]*KD_grads[m]
+                    #for m in range(self.num_teachers - 1):
+                        #comb_grad_t += soft_lam_t[batch_ind,m][:,None]*grad_t[m]
+                        #comb_grad_ss += soft_lam_ss[batch_ind,m][:,None]*grad_ss[m]
+                        
 
                     comb_grad = comb_grad.sum(0)
+                    #comb_grad_t = comb_grad_t.sum(0)
+                    #comb_grad_ss = comb_grad_ss.sum(0)
 
                     out_vec_val = self.init_out - (eta * comb_grad[:self.num_classes].view(1, -1).\
                         expand(self.init_out.shape[0], -1))
@@ -333,14 +343,24 @@ class LearnSoftMultiLambdaMeta(object):
                     combined_ss = (0.75*up_grads_val_ss+0.25*up_grads_ss).T
 
                     grad = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*SL_grads
-                    grad_SS = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*grad_ss
+                    grad_SS = ((1-soft_lam_ss[batch_ind,0])*soft_lam_ss[batch_ind,0])[:,None]*grad_ss
+                    grad_T = ((1-soft_lam_t[batch_ind,0])*soft_lam_t[batch_ind,0])[:,None]*grad_t
                     
                     #grad = SL_grads 
                     for m_1 in range(self.num_teachers):
                         grad -= (soft_lam[batch_ind,0]*soft_lam[batch_ind,m_1+1])[:,None]*KD_grads[m_1]
                         #grad -= KD_grads[m_1]
+                    #for m_1 in range(self.num_teachers - 1):
+                    #grad_SS -= ((1-soft_lam_ss[batch_ind,0])*soft_lam_ss[batch_ind,0])[:,None]*grad_ss
+                    #grad_T -= ((1-soft_lam_t[batch_ind,0])*soft_lam_t[batch_ind,0])[:,None]*grad_t
+                            
                     alpha_grads = torch.matmul(grad,combined)
                     lambdas[batch_ind,0] = lambdas[batch_ind,0] +  500*eta*alpha_grads #9*eta*
+                    
+                    alpha_grads_ss = torch.matmul(grad_SS, combined_ss)
+                    alpha_grads_t = torch.matmul(grad_T, combined)
+                    lambdas_ss[batch_ind,0] = lambdas_ss[batch_ind,0] +  500*eta*alpha_grads_ss #9*eta*
+                    lambdas_t[batch_ind,0] = lambdas_t[batch_ind,0] +  500*eta*alpha_grads_t #9*eta*
                     
                     for m in range(self.num_teachers):
                         grad = (-soft_lam[batch_ind,0]*soft_lam[batch_ind,m+1])[:,None]*SL_grads 
@@ -361,11 +381,8 @@ class LearnSoftMultiLambdaMeta(object):
                         print(len(lambdas_t))
                         print(len(lambdas_t[0]))
                         alpha_grads = torch.matmul(grad,combined)
-                        alpha_grads_ss = torch.matmul(grad_ss, combined_ss)
-                        alpha_grads_t = torch.matmul(grad_t, combined)
                         lambdas[batch_ind,m+1] = lambdas[batch_ind,m+1] +  500*eta*alpha_grads #9*eta*
-                        lambdas_ss[batch_ind,m] = lambdas_ss[batch_ind,m] +  500*eta*alpha_grads_ss #9*eta*
-                        lambdas_t[batch_ind,m] = lambdas_t[batch_ind,m] +  500*eta*alpha_grads_t #9*eta*
+            
                     #print("After",lambdas[batch_ind[0]].item(),lambdas[batch_ind[-1]].item())
                     #lambdas.clamp_(min=1e-7,max=1-1e-7)
                     soft_lam[batch_ind] = F.softmax(lambdas[batch_ind], dim=1)
