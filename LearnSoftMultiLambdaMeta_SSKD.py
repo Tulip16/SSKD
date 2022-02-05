@@ -115,8 +115,8 @@ class LearnSoftMultiLambdaMeta(object):
             tea_out_val = tea_out_val.cuda(0)
 
         KD_grads = [0]*self.num_teachers
-        grad_t = [0]*self.num_teachers
-        grad_ss = [0]*self.num_teachers
+        grad_t = torch.zeros(self.num_teachers)
+        grad_ss = torch.zeros(self.num_teachers)
 
         c_temp = self.temp
         for batch_idx, (inputs, target,indices) in enumerate(self.trainloader):
@@ -350,8 +350,7 @@ class LearnSoftMultiLambdaMeta(object):
                             else:
                                 grad -= (soft_lam[batch_ind,m+1]*soft_lam[batch_ind,m_1+1])[:,None]*KD_grads[m_1]
                                 #grad -= KD_grads[m_1]
-                        grad_ss = torch.from_numpy(np.array(grad_ss))
-                        grad_t = torch.from_numpy(np.array(grad_t))
+                        
                         print("_____________________________")
                         print(len(lambdas))
                         print(len(lambdas[0]))
