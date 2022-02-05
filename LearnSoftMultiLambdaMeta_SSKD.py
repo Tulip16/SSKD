@@ -333,6 +333,8 @@ class LearnSoftMultiLambdaMeta(object):
                     combined_ss = (0.75*up_grads_val_ss+0.25*up_grads_ss).T
 
                     grad = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*SL_grads
+                    grad_SS = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*grad_ss
+                    
                     #grad = SL_grads 
                     for m_1 in range(self.num_teachers):
                         grad -= (soft_lam[batch_ind,0]*soft_lam[batch_ind,m_1+1])[:,None]*KD_grads[m_1]
