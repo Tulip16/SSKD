@@ -316,7 +316,6 @@ for epoch in range(args.epoch):
         lambdas = torch.ones(len(trainset), Nteacher+1)*(args.kd_weight/(args.kd_weight + args.ce_weight))
         lambdas_ss = torch.ones(len(trainset), Nteacher)*args.ss_weight
         lambdas_t = torch.ones(len(trainset), Nteacher)*args.tf_weight
-        print("lambda size", lambdas.size())
         lambdas, lambdas_ss, lambdas_t = lelam.get_lambdas(optimizer.param_groups[0]['lr'],lambdas, lambdas_ss, lambdas_t)
         # lambdas = None
         # lambdas_ss = None
