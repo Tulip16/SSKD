@@ -343,8 +343,8 @@ class LearnSoftMultiLambdaMeta(object):
                     combined_ss = (0.75*up_grads_val_ss+0.25*up_grads_ss).T
 
                     grad = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*SL_grads
-                    grad_SS = ((1-soft_lam_ss[batch_ind,0])*soft_lam_ss[batch_ind,0])[:,None]*grad_ss
-                    grad_T = ((1-soft_lam_t[batch_ind,0])*soft_lam_t[batch_ind,0])[:,None]*grad_t
+                    grad_SS = ((1-soft_lam_ss[batch_ind,0])*soft_lam_ss[batch_ind,0])[:,None]*grad_ss[0]
+                    grad_T = ((1-soft_lam_t[batch_ind,0])*soft_lam_t[batch_ind,0])[:,None]*grad_t[0]
                     
                     #grad = SL_grads 
                     for m_1 in range(self.num_teachers):
@@ -372,14 +372,6 @@ class LearnSoftMultiLambdaMeta(object):
                             else:
                                 grad -= (soft_lam[batch_ind,m+1]*soft_lam[batch_ind,m_1+1])[:,None]*KD_grads[m_1]
                                 #grad -= KD_grads[m_1]
-                        
-                        print("_____________________________")
-                        print(len(lambdas))
-                        print(len(lambdas[0]))
-                        print(len(lambdas_ss))
-                        print(len(lambdas_ss[0]))
-                        print(len(lambdas_t))
-                        print(len(lambdas_t[0]))
                         alpha_grads = torch.matmul(grad,combined)
                         lambdas[batch_ind,m+1] = lambdas[batch_ind,m+1] +  500*eta*alpha_grads #9*eta*
             
