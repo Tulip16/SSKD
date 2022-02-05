@@ -168,7 +168,6 @@ class LearnSoftMultiLambdaMeta(object):
                 SL_grads = torch.cat((l0_grads, l1_grads), dim=1)
                 batch_ind = list(indices) #batch_wise_indices[batch_idx]
                 soft_lam[batch_ind, :] = F.softmax(lambdas[batch_ind, :], dim=1)
-                print("works")
                 
             else:
                 with torch.no_grad():
