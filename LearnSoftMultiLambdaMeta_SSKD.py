@@ -50,7 +50,7 @@ class LearnSoftMultiLambdaMeta(object):
         self.ratio_ss = 0.75
         self.ratio_tf = 1
         self.num_teachers = 1
-        print(N_trn)
+        #print(N_trn)
 
     def update_model(self, model_params):
         """
@@ -279,8 +279,8 @@ class LearnSoftMultiLambdaMeta(object):
 
                 for r in range(10):
                     #print("Before",lambdas[batch_ind[0]].item(),lambdas[batch_ind[-1]].item())
-                    print("soft lam", soft_lam[batch_ind,0][:,None].size())
-                    print("SL_grads", SL_grads.size())
+                    #print("soft lam", soft_lam[batch_ind,0][:,None].size())
+                    #print("SL_grads", SL_grads.size())
                     comb_grad = soft_lam[batch_ind,0][:,None]*SL_grads 
                     #comb_grad = lambdas[batch_ind,0][:,None]*SL_grads
                     #comb_grad_t = soft_lam_t[batch_ind,0][:,None]*grad_t[0]
@@ -331,7 +331,7 @@ class LearnSoftMultiLambdaMeta(object):
                     loss_SL = self.criterion_red(out_vec, train_target)  # self.criterion(outputs, target).sum()
 
                     #print(round(loss_SL_val.item(),4),"+",round(loss_SL.item(),4), end=",")
-                    print(round(loss_KD_val.item(),4),"+",round(loss_SL.item(),4), end=",")
+                    # print(round(loss_KD_val.item(),4),"+",round(loss_SL.item(),4), end=",")
 
                     l0_grads = (torch.autograd.grad(loss_SL, out_vec)[0]).detach().clone().cuda(0)
                     l0_expand = torch.repeat_interleave(l0_grads, train_l1.shape[1], dim=1)
@@ -378,7 +378,7 @@ class LearnSoftMultiLambdaMeta(object):
                     #print("After",lambdas[batch_ind[0]].item(),lambdas[batch_ind[-1]].item())
                     #lambdas.clamp_(min=1e-7,max=1-1e-7)
                     soft_lam[batch_ind] = F.softmax(lambdas[batch_ind], dim=1)
-                print()#"End for loop")
+                #print()#"End for loop")
 
         #lambdas.clamp_(min=0.01,max=0.99)
         return lambdas.cuda(0), lambdas_ss.cuda(0), lambdas_t.cuda(0)
