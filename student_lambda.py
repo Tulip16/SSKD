@@ -219,9 +219,9 @@ scheduler = MultiStepLR(optimizer, milestones=args.milestones, gamma=args.gamma)
 
 best_acc = 0
 Nteacher = 1 # check
-lambdas = torch.ones(args.batch_size, Nteacher+1)*(args.kd_weight/(args.kd_weight + args.ce_weight))
-lambdas_ss = torch.ones(args.batch_size, Nteacher)*args.ss_weight
-lambdas_t = torch.ones(args.batch_size, Nteacher)*args.tf_weight
+lambdas = torch.ones(len(trainset), Nteacher+1)*(args.kd_weight/(args.kd_weight + args.ce_weight))
+lambdas_ss = torch.ones(len(trainset), Nteacher)*args.ss_weight
+lambdas_t = torch.ones(len(trainset), Nteacher)*args.tf_weight
 num_cls = 100
 N = 0 # dead variable
 criterion_nored = None # dead variable
