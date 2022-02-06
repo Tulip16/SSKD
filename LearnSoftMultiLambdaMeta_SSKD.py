@@ -352,9 +352,7 @@ class LearnSoftMultiLambdaMeta(object):
                         combined = (0.75*up_grads_val+0.25*up_grads).T
                         combined_ss = (0.75*up_grads_val_ss+0.25*up_grads_ss).T
                         
-                        print("sizes")
-                        print(SL_grads.size())
-                        print(grad_ss[0].size())
+                       
                         one_index = (torch.arange(4*batch*self.fit) % 4 == 1).cuda()
                         two_index = (torch.arange(4*batch*self.fit) % 4 == 2).cuda()
                         three_index = (torch.arange(4*batch*self.fit) % 4 == 3).cuda()
