@@ -206,8 +206,6 @@ class LearnSoftMultiLambdaMeta(object):
 
                 output, l1, s_feat, _ = self.model(x, bb_grad=True)
                 # log_nor_output = F.log_softmax(output[nor_index] / args.kd_T, dim=1)
-                output.double()
-                print(output.dtype)
                 log_aug_output = F.log_softmax(output[aug_index] / self.temp_T, dim=1)
                 with torch.no_grad():
                     knowledge, _, t_feat, _ = self.teacher_model(x)
