@@ -162,6 +162,7 @@ class LearnSoftMultiLambdaMeta(object):
                 loss_SL = self.criterion_red(outputs[::4, :], target)  # self.criterion(outputs, target).sum()
 
                 l0_grads = (torch.autograd.grad(loss_SL, outputs)[0]).detach().clone().cuda(0)
+                l0_grads = l0_grads[::4,:]
                 l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                 l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
@@ -192,6 +193,7 @@ class LearnSoftMultiLambdaMeta(object):
                         F.softmax(knowledge[nor_index] / self.temp, dim=1))
 
                     l0_grads = (torch.autograd.grad(loss_KD, outputs)[0]).detach().clone().cuda(0)
+                    l0_grads = l0_grads[::4,:]
                     l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                     l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
