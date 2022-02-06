@@ -161,7 +161,7 @@ class LearnSoftMultiLambdaMeta(object):
 
                 loss_SL = self.criterion_red(outputs[::4, :], target)  # self.criterion(outputs, target).sum()
 
-                l0_grads = (torch.autograd.grad(loss_SL, outputs[::4,:],allow_unused=True)[0]).detach().clone().cuda(0)
+                l0_grads = (torch.autograd.grad(loss_SL, outputs)[0]).detach().clone().cuda(0)
                 l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                 l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
@@ -191,7 +191,7 @@ class LearnSoftMultiLambdaMeta(object):
                         F.log_softmax(outputs[::4,:] / self.temp, dim=1), \
                         F.softmax(knowledge / self.temp, dim=1))
 
-                    l0_grads = (torch.autograd.grad(loss_KD, outputs[::4,:],allow_unused=True)[0]).detach().clone().cuda(0)
+                    l0_grads = (torch.autograd.grad(loss_KD, outputs)[0]).detach().clone().cuda(0)
                     l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                     l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
@@ -264,7 +264,7 @@ class LearnSoftMultiLambdaMeta(object):
                         log_simi[distill_index_ss], \
                         simi_knowledge[distill_index_ss])
 
-                    l0_grads = (torch.autograd.grad(loss_T, output)[0]).detach().clone().cuda(0)
+                    l0_grads = (torch.autograd.grad(loss_T, outputs)[0]).detach().clone().cuda(0)
                     l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                     l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
