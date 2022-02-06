@@ -130,7 +130,7 @@ class LearnSoftMultiLambdaMeta(object):
                 # inputs = inputs[:,0,:,:,:].cuda()
                 c,h,w = inputs.size()[-3:]
                 inputs = inputs.view(-1,c,h,w).cuda()
-                inputs = inputs[::4,:,:,:]
+                #inputs = inputs[::4,:,:,:] 
                 # print("input for SL grads after tranformation", inputs.size())
 
                 outputs, l1, i_, _ = self.model(inputs)
@@ -147,7 +147,8 @@ class LearnSoftMultiLambdaMeta(object):
 
 
 
-                # print(outputs.size())
+                print("output size")
+                print(outputs.size())
                 #print(outputs)
                 #print(custom_target)
                 # print(custom_target.size())
@@ -155,7 +156,7 @@ class LearnSoftMultiLambdaMeta(object):
                 #print(_.size())
 
 
-                loss_SL = self.criterion_red(outputs, target)  # self.criterion(outputs, target).sum()
+                loss_SL = self.criterion_red(outputs[::4], target)  # self.criterion(outputs, target).sum()
 
                 l0_grads = (torch.autograd.grad(loss_SL, outputs)[0]).detach().clone().cuda(0)
                 l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
@@ -168,7 +169,6 @@ class LearnSoftMultiLambdaMeta(object):
                         train_target = target.cuda(0)
                     SL_grads = torch.cat((l0_grads, l1_grads), dim=1)
                     batch_ind = list(indices) #batch_wise_indices[batch_idx]
-                    soft_lam[batch_ind, :] = F.softmax(lambdas[batch_ind, :], dim=1)
 
                 else:
                     with torch.no_grad():
