@@ -189,7 +189,7 @@ class LearnSoftMultiLambdaMeta(object):
                         
                     loss_KD = self.temp * self.temp * nn.KLDivLoss(reduction='batchmean')(
                         F.log_softmax(outputs[::4,:] / self.temp, dim=1), \
-                        F.softmax(knowledge / self.temp, dim=1))
+                        F.softmax(knowledge[nor_index] / self.temp, dim=1))
 
                     l0_grads = (torch.autograd.grad(loss_KD, outputs)[0]).detach().clone().cuda(0)
                     l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
