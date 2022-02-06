@@ -354,7 +354,10 @@ class LearnSoftMultiLambdaMeta(object):
 
                         combined = (0.75*up_grads_val+0.25*up_grads).T
                         combined_ss = (0.75*up_grads_val_ss+0.25*up_grads_ss).T
-
+                        
+                        print("sizes")
+                        print(SL_grads.size())
+                        print(grad_ss[0].size())
                         grad = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*SL_grads
                         grad_SS = ((1-soft_lam_ss[batch_ind,0])*soft_lam_ss[batch_ind,0])[:,None]*(grad_ss[0][one_index]+grad_ss[0][two_index]+grad_ss[0][three_index])/3
                         grad_T = ((1-soft_lam_t[batch_ind,0])*soft_lam_t[batch_ind,0])[:,None]*(grad_t[0][one_index]+grad_t[0][two_index]+grad_t[0][three_index])/3
