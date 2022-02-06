@@ -218,6 +218,10 @@ optimizer = optim.SGD(s_model.parameters(), lr=args.lr, momentum=args.momentum, 
 scheduler = MultiStepLR(optimizer, milestones=args.milestones, gamma=args.gamma)
 
 best_acc = 0
+Nteacher = 1 # check
+lambdas = torch.ones(len(trainset), Nteacher+1)*(args.kd_weight/(args.kd_weight + args.ce_weight))
+lambdas_ss = torch.ones(len(trainset), Nteacher)*args.ss_weight
+lambdas_t = torch.ones(len(trainset), Nteacher)*args.tf_weight
 for epoch in range(args.epoch):
 
     # train
@@ -230,6 +234,28 @@ for epoch in range(args.epoch):
     ssp_acc_record = AverageMeter()
     
     start = time.time()
+    
+
+    num_cls = 100
+    N = 0 # dead variable
+    criterion_nored = None # dead variable
+    device = 0 # check
+    fit = 5 # check
+    temp = 1
+    criterion = nn.CrossEntropyLoss()
+    # criterion_nored = nn.CrossEntropyLoss(reduction='none')
+    lelam = LearnSoftMultiLambdaMeta(train_loader, val_loader, s_model, num_cls, N, criterion_nored, \
+                                device,  fit, \
+                                t_model, criterion, temp)
+
+    cached_state_dictT = copy.deepcopy(s_model.state_dict())
+    clone_dict = copy.deepcopy(s_model.state_dict())
+    #if self.configdata['ds_strategy']['type'] in ['MultiLam']:
+    lelam.update_model(clone_dict)
+    s_model.load_state_dict(cached_state_dictT)
+    lambdas, lambdas_ss, lambdas_t = lelam.get_lambdas(optimizer.param_groups[0]['lr'],lambdas, lambdas_ss, lambdas_t)
+            
+
     
     for x, target, indices in train_loader:
 
@@ -291,32 +317,29 @@ for epoch in range(args.epoch):
         simi_knowledge = F.softmax(t_simi / args.ss_T, dim=1)
 
         # get lambdas 
-        num_cls = 100
-        N = 0 # dead variable
-        criterion_nored = None # dead variable
-        device = 0 # check
-        fit = 5 # check
-        temp = 1
-        criterion = nn.CrossEntropyLoss()
+        #num_cls = 100
+        #N = 0 # dead variable
+        #criterion_nored = None # dead variable
+        #device = 0 # check
+        #fit = 5 # check
+        #temp = 1
+        #criterion = nn.CrossEntropyLoss()
         # criterion_nored = nn.CrossEntropyLoss(reduction='none')
-        lelam = LearnSoftMultiLambdaMeta(train_loader, val_loader, s_model, num_cls, N, criterion_nored, \
-                                device,  fit, \
-                                t_model, criterion, temp)
+        #lelam = LearnSoftMultiLambdaMeta(train_loader, val_loader, s_model, num_cls, N, criterion_nored, \
+                                #device,  fit, \
+                                #t_model, criterion, temp)
         
-        cached_state_dictT = copy.deepcopy(s_model.state_dict())
-        #cached_state_dict = copy.deepcopy(ema_model.state_dict())
-        clone_dict = copy.deepcopy(s_model.state_dict())
-        #if self.configdata['ds_strategy']['type'] in ['MultiLam']:
-        lelam.update_model(clone_dict)
-        #ema_model.load_state_dict(cached_state_dict)
-        s_model.load_state_dict(cached_state_dictT)
+        #cached_state_dictT = copy.deepcopy(s_model.state_dict())
+        #clone_dict = copy.deepcopy(s_model.state_dict())
+        #lelam.update_model(clone_dict)
+        #s_model.load_state_dict(cached_state_dictT)
             
 
-        Nteacher = 1 # check
-        lambdas = torch.ones(len(trainset), Nteacher+1)*(args.kd_weight/(args.kd_weight + args.ce_weight))
-        lambdas_ss = torch.ones(len(trainset), Nteacher)*args.ss_weight
-        lambdas_t = torch.ones(len(trainset), Nteacher)*args.tf_weight
-        lambdas, lambdas_ss, lambdas_t = lelam.get_lambdas(optimizer.param_groups[0]['lr'],lambdas, lambdas_ss, lambdas_t)
+        #Nteacher = 1 # check
+        #lambdas = torch.ones(len(trainset), Nteacher+1)*(args.kd_weight/(args.kd_weight + args.ce_weight))
+        #lambdas_ss = torch.ones(len(trainset), Nteacher)*args.ss_weight
+        #lambdas_t = torch.ones(len(trainset), Nteacher)*args.tf_weight
+        #lambdas, lambdas_ss, lambdas_t = lelam.get_lambdas(optimizer.param_groups[0]['lr'],lambdas, lambdas_ss, lambdas_t)
         # lambdas = None
         # lambdas_ss = None
         # lambdas_t = None
