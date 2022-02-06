@@ -132,8 +132,11 @@ class LearnSoftMultiLambdaMeta(object):
                 inputs = inputs.view(-1,c,h,w).cuda()
                 #inputs = inputs[::4,:,:,:] 
                 # print("input for SL grads after tranformation", inputs.size())
+                batch = int(inputs.size(0) / 4)
+                nor_index = (torch.arange(4*batch) % 4 == 0).cuda()
+                aug_index = (torch.arange(4*batch) % 4 != 0).cuda()
 
-                outputs, l1, i_, _ = self.model(inputs)
+                outputs, l1, s_feat, _ = self.model(inputs)
                 # custom_target=torch.cat((target,target),dim=0)
                 # custom_target=torch.cat((custom_target,custom_target),dim=0)
                 # print("outputs sz", outputs.size())
@@ -147,8 +150,8 @@ class LearnSoftMultiLambdaMeta(object):
 
 
 
-                print("output size")
-                print(outputs.size())
+                #print("output size")
+                #print(outputs.size())
                 #print(outputs)
                 #print(custom_target)
                 # print(custom_target.size())
@@ -156,15 +159,15 @@ class LearnSoftMultiLambdaMeta(object):
                 #print(_.size())
 
 
-                loss_SL = self.criterion_red(outputs[::4], target)  # self.criterion(outputs, target).sum()
+                loss_SL = self.criterion_red(outputs[::4, :], target)  # self.criterion(outputs, target).sum()
 
-                l0_grads = (torch.autograd.grad(loss_SL, outputs)[0]).detach().clone().cuda(0)
+                l0_grads = (torch.autograd.grad(loss_SL, outputs[::4,:])[0]).detach().clone().cuda(0)
                 l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                 l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
                 if batch_idx % self.fit == 0:
                     with torch.no_grad():
-                        train_out = outputs.cuda(0)
+                        train_out = outputs[::4,:].cuda(0)
                         train_l1 = l1.cuda(0)
                         train_target = target.cuda(0)
                     SL_grads = torch.cat((l0_grads, l1_grads), dim=1)
@@ -172,7 +175,7 @@ class LearnSoftMultiLambdaMeta(object):
 
                 else:
                     with torch.no_grad():
-                        train_out = torch.cat((train_out,outputs.cuda(0)), dim=0)
+                        train_out = torch.cat((train_out,outputs[::4,:].cuda(0)), dim=0)
                         train_l1 = torch.cat((train_l1,l1.cuda(0)), dim=0)
                         train_target = torch.cat((train_target,target.cuda(0)), dim=0)
                     SL_grads = torch.cat((SL_grads, torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
@@ -180,12 +183,15 @@ class LearnSoftMultiLambdaMeta(object):
 
                 for m in range(self.num_teachers):
                     with torch.no_grad():
-                        teacher_outputs, _, _, _ = self.teacher_model(inputs)
+                        knowledge, _, t_feat, _ = self.teacher_model(inputs)
+                        # nor_knowledge = F.softmax(knowledge[nor_index] / args.kd_T, dim=1)
+                        aug_knowledge = F.softmax(knowledge[aug_index] / self.temp_T, dim=1)
+                        
                     loss_KD = self.temp * self.temp * nn.KLDivLoss(reduction='batchmean')(
-                        F.log_softmax(outputs / self.temp, dim=1), \
-                        F.softmax(teacher_outputs / self.temp, dim=1))
+                        F.log_softmax(outputs[::4,:] / self.temp, dim=1), \
+                        F.softmax(knowledge / self.temp, dim=1))
 
-                    l0_grads = (torch.autograd.grad(loss_KD, outputs)[0]).detach().clone().cuda(0)
+                    l0_grads = (torch.autograd.grad(loss_KD, outputs[::4,:])[0]).detach().clone().cuda(0)
                     l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                     l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
 
@@ -194,24 +200,23 @@ class LearnSoftMultiLambdaMeta(object):
                     else:
                         KD_grads[m] = torch.cat((KD_grads[m], torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
 
-                ''' T and SS components of the loss '''
-                for m in range(self.num_teachers):
-                    c,h,w = inputs.size()[-3:]
-                    x = inputs.view(-1,c,h,w).cuda()
+                    ''' T and SS components of the loss '''
+                    #c,h,w = inputs.size()[-3:]
+                    #x = inputs.view(-1,c,h,w).cuda()
                     # _, num_transformations, _, _, _ = inputs.size()
                     # x = inputs[:,1:num_trasformations,:,:,:]
 
-                    batch = int(x.size(0) / 4)
-                    nor_index = (torch.arange(4*batch) % 4 == 0).cuda()
-                    aug_index = (torch.arange(4*batch) % 4 != 0).cuda()
+                    #batch = int(x.size(0) / 4)
+                    #nor_index = (torch.arange(4*batch) % 4 == 0).cuda()
+                    #aug_index = (torch.arange(4*batch) % 4 != 0).cuda()
 
-                    output, l1, s_feat, _ = self.model(x, bb_grad=True)
-                    # log_nor_output = F.log_softmax(output[nor_index] / args.kd_T, dim=1)
-                    log_aug_output = F.log_softmax(output[aug_index] / self.temp_T, dim=1)
-                    with torch.no_grad():
-                        knowledge, _, t_feat, _ = self.teacher_model(x)
+                    #output, l1, s_feat, _ = self.model(x, bb_grad=True)
+                    # log_nor_output = F.log_softmax(outputs[nor_index] / args.kd_T, dim=1)
+                    log_aug_output = F.log_softmax(outputs[aug_index] / self.temp_T, dim=1)
+                    #with torch.no_grad():
+                        #knowledge, _, t_feat, _ = self.teacher_model(x)
                         # nor_knowledge = F.softmax(knowledge[nor_index] / args.kd_T, dim=1)
-                        aug_knowledge = F.softmax(knowledge[aug_index] / self.temp_T, dim=1)
+                        #aug_knowledge = F.softmax(knowledge[aug_index] / self.temp_T, dim=1)
 
                     special_target = target[::4] # might be target[:target.size()[0]/4]
                     aug_target = special_target.unsqueeze(1).expand(-1,3).contiguous().view(-1).long().cuda()
