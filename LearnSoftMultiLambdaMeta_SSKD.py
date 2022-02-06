@@ -133,9 +133,6 @@ class LearnSoftMultiLambdaMeta(object):
                 #inputs = inputs[::4,:,:,:] 
                 # print("input for SL grads after tranformation", inputs.size())
                 batch = int(inputs.size(0) / 4)
-                one_index = (torch.arange(4*batch) % 4 == 1).cuda()
-                two_index = (torch.arange(4*batch) % 4 == 2).cuda()
-                three_index = (torch.arange(4*batch) % 4 == 3).cuda()
                 nor_index = (torch.arange(4*batch) % 4 == 0).cuda()
                 aug_index = (torch.arange(4*batch) % 4 != 0).cuda()
 
@@ -358,6 +355,9 @@ class LearnSoftMultiLambdaMeta(object):
                         print("sizes")
                         print(SL_grads.size())
                         print(grad_ss[0].size())
+                        one_index = (torch.arange(4*batch*self.fit) % 4 == 1).cuda()
+                        two_index = (torch.arange(4*batch*self.fit) % 4 == 2).cuda()
+                        three_index = (torch.arange(4*batch*self.fit) % 4 == 3).cuda()
                         grad = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*SL_grads
                         grad_SS = ((1-soft_lam_ss[batch_ind,0])*soft_lam_ss[batch_ind,0])[:,None]*(grad_ss[0][one_index]+grad_ss[0][two_index]+grad_ss[0][three_index])/3
                         grad_T = ((1-soft_lam_t[batch_ind,0])*soft_lam_t[batch_ind,0])[:,None]*(grad_t[0][one_index]+grad_t[0][two_index]+grad_t[0][three_index])/3
