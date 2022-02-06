@@ -81,51 +81,51 @@ class LearnSoftMultiLambdaMeta(object):
 
             for batch_idx, (inputs, targets, _) in enumerate(self.valloader):
                 # print(inputs.size())
-                if torch.cuda.is_available():
-                    inputs, targets = inputs.to(self.device), targets.to(self.device, non_blocking=True)
-                    # print(inputs.size())
-                    inputs = inputs[:,0,:,:,:].cuda()
-                    if batch_idx == 0:
-                        out, l1, _, _ = self.model(inputs)
-                        self.init_out = out
-                        self.init_l1 = l1
-                        self.y_val = targets  # .view(-1, 1)
-                        tea_out_val, _, _, _ = self.teacher_model(inputs)
-                    else:
-                        out, l1, _, _ = self.model(inputs)
-                        self.init_out = torch.cat((self.init_out, out), dim=0)
-                        self.init_l1 = torch.cat((self.init_l1, l1), dim=0)
-                        self.y_val = torch.cat((self.y_val, targets), dim=0)
-                        tea_out_val_temp, _, _, _ = self.teacher_model(inputs)
-                        tea_out_val = torch.cat((tea_out_val, tea_out_val_temp), dim=0)
+                inputs, targets = inputs.to(self.device), targets.to(self.device, non_blocking=True)
+                # print(inputs.size())
+                inputs = inputs[:,0,:,:,:].cuda()
+                if batch_idx == 0:
+                    out, l1, _, _ = self.model(inputs)
+                    self.init_out = out
+                    self.init_l1 = l1
+                    self.y_val = targets  # .view(-1, 1)
+                    tea_out_val, _, _, _ = self.teacher_model(inputs)
+                else:
+                    out, l1, _, _ = self.model(inputs)
+                    self.init_out = torch.cat((self.init_out, out), dim=0)
+                    self.init_l1 = torch.cat((self.init_l1, l1), dim=0)
+                    self.y_val = torch.cat((self.y_val, targets), dim=0)
+                    tea_out_val_temp, _, _, _ = self.teacher_model(inputs)
+                    tea_out_val = torch.cat((tea_out_val, tea_out_val_temp), dim=0)
 
-                # val_loss_SL = self.criterion_red(self.init_out,self.y_val)
+            # val_loss_SL = self.criterion_red(self.init_out,self.y_val)
 
-                #val_loss_SL = torch.sum(self.criterion(self.init_out, self.y_val))
+            #val_loss_SL = torch.sum(self.criterion(self.init_out, self.y_val))
 
-                # print(val_loss_SL)
+            # print(val_loss_SL)
 
-                '''val_loss_KD = nn.KLDivLoss(reduction='none')(F.log_softmax(self.init_out / self.temp, dim=1),\
-                    F.softmax(tea_out_val / self.temp, dim=1))
-                val_loss_KD = self.temp*self.temp*torch.sum (val_loss_KD)#torch.mean(torch.sum (val_loss_KD,dim=1))'''
+            '''val_loss_KD = nn.KLDivLoss(reduction='none')(F.log_softmax(self.init_out / self.temp, dim=1),\
+                F.softmax(tea_out_val / self.temp, dim=1))
+            val_loss_KD = self.temp*self.temp*torch.sum (val_loss_KD)#torch.mean(torch.sum (val_loss_KD,dim=1))'''
 
-                # val_loss_KD = self.temp*self.temp*nn.KLDivLoss(reduction='batchmean')(F.log_softmax(self.init_out / self.temp, dim=1),\
-                #    F.softmax(tea_out_val / self.temp, dim=1))
+            # val_loss_KD = self.temp*self.temp*nn.KLDivLoss(reduction='batchmean')(F.log_softmax(self.init_out / self.temp, dim=1),\
+            #    F.softmax(tea_out_val / self.temp, dim=1))
 
-                self.init_out = self.init_out.cuda(0)
-                self.init_l1 = self.init_l1.cuda(0)
-                self.y_val = self.y_val.cuda(0)
-                tea_out_val = tea_out_val.cuda(0)
+            self.init_out = self.init_out.cuda(0)
+            self.init_l1 = self.init_l1.cuda(0)
+            self.y_val = self.y_val.cuda(0)
+            tea_out_val = tea_out_val.cuda(0)
 
-            KD_grads = [0]*self.num_teachers
-            grad_t = [0]*self.num_teachers
-            grad_ss = [0]*self.num_teachers
+        KD_grads = [0]*self.num_teachers
+        grad_t = [0]*self.num_teachers
+        grad_ss = [0]*self.num_teachers
 
-            c_temp = self.temp
-            for batch_idx, (inputs, target,indices) in enumerate(self.trainloader):
+        c_temp = self.temp
+        for batch_idx, (inputs, target,indices) in enumerate(self.trainloader):
 
-                #batch_wise_indices = list(self.trainloader.batch_sampler)
-                # print("input for SL grads before tranformation", inputs.size())
+            #batch_wise_indices = list(self.trainloader.batch_sampler)
+            # print("input for SL grads before tranformation", inputs.size())
+            if torch.cuda.is_available():
                 inputs, target = inputs.to(self.device), target.to(self.device, non_blocking=True)
                 # inputs = inputs[:,0,:,:,:].cuda()
                 c,h,w = inputs.size()[-3:]
