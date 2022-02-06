@@ -163,13 +163,13 @@ class LearnSoftMultiLambdaMeta(object):
 
                 l0_grads = (torch.autograd.grad(loss_SL, outputs)[0]).detach().clone().cuda(0)
                 l0_grads = l0_grads[::4,:]
-                l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
-                l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
+                l0_expand = torch.repeat_interleave(l0_grads, l1[::4,:].shape[1], dim=1)
+                l1_grads = l0_expand * l1[::4,:].repeat(1, self.num_classes).cuda(0)
 
                 if batch_idx % self.fit == 0:
                     with torch.no_grad():
                         train_out = outputs[::4,:].cuda(0)
-                        train_l1 = l1.cuda(0)
+                        train_l1 = l1[::4,:].cuda(0)
                         train_target = target.cuda(0)
                     SL_grads = torch.cat((l0_grads, l1_grads), dim=1)
                     batch_ind = list(indices) #batch_wise_indices[batch_idx]
@@ -177,7 +177,7 @@ class LearnSoftMultiLambdaMeta(object):
                 else:
                     with torch.no_grad():
                         train_out = torch.cat((train_out,outputs[::4,:].cuda(0)), dim=0)
-                        train_l1 = torch.cat((train_l1,l1.cuda(0)), dim=0)
+                        train_l1 = torch.cat((train_l1,l1[::4,:].cuda(0)), dim=0)
                         train_target = torch.cat((train_target,target.cuda(0)), dim=0)
                     SL_grads = torch.cat((SL_grads, torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
                     batch_ind.extend(list(indices))#batch_wise_indices[batch_idx])
@@ -194,8 +194,8 @@ class LearnSoftMultiLambdaMeta(object):
 
                     l0_grads = (torch.autograd.grad(loss_KD, outputs)[0]).detach().clone().cuda(0)
                     l0_grads = l0_grads[::4,:]
-                    l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
-                    l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
+                    l0_expand = torch.repeat_interleave(l0_grads, l1[::4,:].shape[1], dim=1)
+                    l1_grads = l0_expand * l1[::4,:].repeat(1, self.num_classes).cuda(0)
 
                     if batch_idx % self.fit == 0:
                         KD_grads[m] = torch.cat((l0_grads, l1_grads), dim=1)
