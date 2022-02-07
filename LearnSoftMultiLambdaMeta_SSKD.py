@@ -184,6 +184,10 @@ class LearnSoftMultiLambdaMeta(object):
                     SL_grads = torch.cat((SL_grads, torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
                     batch_ind.extend(list(indices))#batch_wise_indices[batch_idx])
 
+                del l0_grads
+                del l1_grads
+                del l0_expand
+                torch.cuda.empty_cache()
                 for m in range(self.num_teachers):
                     with torch.no_grad():
                         knowledge, _, t_feat, _ = self.teacher_model(inputs)
@@ -204,7 +208,11 @@ class LearnSoftMultiLambdaMeta(object):
                         KD_grads[m] = torch.cat((l0_grads, l1_grads), dim=1)
                     else:
                         KD_grads[m] = torch.cat((KD_grads[m], torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
-
+                    
+                    del l0_grads
+                    del l1_grads
+                    del l0_expand
+                    torch.cuda.empty_cache()
                     ''' T and SS components of the loss '''
                     #c,h,w = inputs.size()[-3:]
                     #x = inputs.view(-1,c,h,w).cuda()
@@ -287,6 +295,10 @@ class LearnSoftMultiLambdaMeta(object):
                         grad_ss[m] = l0_expand
                     else:
                         grad_ss[m] = torch.cat((grad_ss[m], l0_expand), dim=0)
+                    del l0_grads
+                    del l1_grads
+                    del l0_expand
+                    torch.cuda.empty_cache()
 
 
                 if (batch_idx + 1) % self.fit == 0 or batch_idx + 1 == len(self.trainloader):
@@ -392,6 +404,9 @@ class LearnSoftMultiLambdaMeta(object):
                         alpha_grads_t = torch.matmul(grad_T, combined)
                         lambdas_ss[batch_ind,0] = lambdas_ss[batch_ind,0] +  100*eta*alpha_grads_ss #9*eta*
                         lambdas_t[batch_ind,0] = lambdas_t[batch_ind,0] +  100*eta*alpha_grads_t #9*eta*
+                        del alpha_grads_ss
+                        del alpha_grads_t
+                        torch.cuda.empty_cache()
 
                         for m in range(self.num_teachers):
                             grad = KD_grads[m] - SL_grads
@@ -399,6 +414,12 @@ class LearnSoftMultiLambdaMeta(object):
                             alpha_grads = torch.matmul(grad,combined)
                             lambdas[batch_ind,m] = lambdas[batch_ind,m] +  100*eta*alpha_grads #9*eta*
 
+                        del alpha_grads
+                        del grad
+                        del grad_SS
+                        del grad_T
+                        torch.cuda.empty_cache()
+                        
                         #print("After",lambdas[batch_ind[0]].item(),lambdas[batch_ind[-1]].item())
                         lambdas.clamp_(min=1e-7,max=1-1e-7)
                         lambdas[batch_ind,0] = 1- torch.max(lambdas[batch_ind,1:],dim=1).values
