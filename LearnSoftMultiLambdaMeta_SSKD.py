@@ -65,7 +65,7 @@ class LearnSoftMultiLambdaMeta(object):
 
     
     def get_lambdas(self, eta,lam, lam_ss, lam_t):
-
+        counter=0
         offset = 0
         batch_wise_indices = list(self.trainloader.batch_sampler)
         #eta =0.1
@@ -335,7 +335,9 @@ class LearnSoftMultiLambdaMeta(object):
                         torch.cuda.empty_cache()
                         #print(torch.cuda.memory_summary(device=None, abbreviated=False))
                         #print(torch.cuda.memory_stats(device=None))
-                        #print(torch.cuda.memory_allocated(device=None))
+                        if counter <= 10:
+                            print(torch.cuda.memory_allocated(device=None))
+                        counter += 1
                         up_grads_val = torch.cat((l0_grads, l1_grads), dim=1).sum(0)
                         up_grads_val_ss = self.init_l1.repeat(1, self.num_classes).cuda(0).sum(0)
 
