@@ -116,6 +116,7 @@ class LearnSoftMultiLambdaMeta(object):
             self.y_val = self.y_val.cuda(0)
             tea_out_val = tea_out_val.cuda(0)
 
+        torch.cuda.empty_cache()
         KD_grads = [0]*self.num_teachers
         grad_t = [0]*self.num_teachers
         grad_ss = [0]*self.num_teachers
@@ -133,8 +134,8 @@ class LearnSoftMultiLambdaMeta(object):
                 #inputs = inputs[::4,:,:,:] 
                 # print("input for SL grads after tranformation", inputs.size())
                 batch = int(inputs.size(0) / 4)
-                nor_index = (torch.arange(4*batch) % 4 == 0).cuda()
-                aug_index = (torch.arange(4*batch) % 4 != 0).cuda()
+                nor_index = (torch.arange(4*batch) % 4 == 0)
+                aug_index = (torch.arange(4*batch) % 4 != 0)
 
                 outputs, l1, s_feat, _ = self.model(inputs)
                 # custom_target=torch.cat((target,target),dim=0)
@@ -165,6 +166,7 @@ class LearnSoftMultiLambdaMeta(object):
                 l0_grads = l0_grads[::4,:]
                 l0_expand = torch.repeat_interleave(l0_grads, l1[::4,:].shape[1], dim=1)
                 l1_grads = l0_expand * l1[::4,:].repeat(1, self.num_classes).cuda(0)
+                torch.cuda.empty_cache()
 
                 if batch_idx % self.fit == 0:
                     with torch.no_grad():
@@ -196,6 +198,7 @@ class LearnSoftMultiLambdaMeta(object):
                     l0_grads = l0_grads[::4,:]
                     l0_expand = torch.repeat_interleave(l0_grads, l1[::4,:].shape[1], dim=1)
                     l1_grads = l0_expand * l1[::4,:].repeat(1, self.num_classes).cuda(0)
+                    torch.cuda.empty_cache()
 
                     if batch_idx % self.fit == 0:
                         KD_grads[m] = torch.cat((l0_grads, l1_grads), dim=1)
@@ -269,6 +272,7 @@ class LearnSoftMultiLambdaMeta(object):
                     l0_grads = (torch.autograd.grad(loss_T, outputs)[0]).detach().clone().cuda(0)
                     l0_expand = torch.repeat_interleave(l0_grads, l1.shape[1], dim=1)
                     l1_grads = l0_expand * l1.repeat(1, self.num_classes).cuda(0)
+                    torch.cuda.empty_cache()
 
                     if batch_idx % self.fit == 0:
                         grad_t[m] = torch.cat((l0_grads, l1_grads), dim=1)
@@ -328,6 +332,7 @@ class LearnSoftMultiLambdaMeta(object):
                         #print(round(loss_SL_val.item(),4), end=",")
                         l0_expand = torch.repeat_interleave(l0_grads, self.init_l1.shape[1], dim=1)
                         l1_grads = l0_expand * self.init_l1.repeat(1, self.num_classes).cuda(0)
+                        torch.cuda.empty_cache()
                         print(torch.cuda.memory_summary(device=None, abbreviated=False))
                         print(torch.cuda.memory_stats(device=None))
                         print(torch.cuda.memory_allocated(device=None))
@@ -349,6 +354,7 @@ class LearnSoftMultiLambdaMeta(object):
                         l0_grads = (torch.autograd.grad(loss_SL, out_vec)[0]).detach().clone().cuda(0)
                         l0_expand = torch.repeat_interleave(l0_grads, train_l1.shape[1], dim=1)
                         l1_grads = l0_expand * train_l1.repeat(1, self.num_classes).cuda(0)
+                        torch.cuda.empty_cache()
                         up_grads = torch.cat((l0_grads, l1_grads), dim=1).sum(0)
                         up_grads_ss = train_l1.repeat(1, self.num_classes).cuda(0).sum(0)
 
@@ -356,9 +362,9 @@ class LearnSoftMultiLambdaMeta(object):
                         combined_ss = (0.75*up_grads_val_ss+0.25*up_grads_ss).T
                         
                        
-                        one_index = (torch.arange(4*batch*self.fit) % 4 == 1).cuda()
-                        two_index = (torch.arange(4*batch*self.fit) % 4 == 2).cuda()
-                        three_index = (torch.arange(4*batch*self.fit) % 4 == 3).cuda()
+                        one_index = (torch.arange(4*batch*self.fit) % 4 == 1)
+                        two_index = (torch.arange(4*batch*self.fit) % 4 == 2)
+                        three_index = (torch.arange(4*batch*self.fit) % 4 == 3)
                         grad = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*SL_grads
                         grad_SS = ((1-soft_lam_ss[batch_ind,0])*soft_lam_ss[batch_ind,0])[:,None]*(grad_ss[0][one_index]+grad_ss[0][two_index]+grad_ss[0][three_index])/3
                         grad_T = ((1-soft_lam_t[batch_ind,0])*soft_lam_t[batch_ind,0])[:,None]*(grad_t[0][one_index]+grad_t[0][two_index]+grad_t[0][three_index])/3
