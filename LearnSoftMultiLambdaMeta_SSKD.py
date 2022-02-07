@@ -184,6 +184,8 @@ class LearnSoftMultiLambdaMeta(object):
                     SL_grads = torch.cat((SL_grads, torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
                     batch_ind.extend(list(indices))#batch_wise_indices[batch_idx])
 
+                
+                del loss_SL
                 del l0_grads
                 del l1_grads
                 del l0_expand
@@ -209,6 +211,7 @@ class LearnSoftMultiLambdaMeta(object):
                     else:
                         KD_grads[m] = torch.cat((KD_grads[m], torch.cat((l0_grads, l1_grads), dim=1)), dim=0)
                     
+                    del loss_KD
                     del l0_grads
                     del l1_grads
                     del l0_expand
@@ -295,6 +298,14 @@ class LearnSoftMultiLambdaMeta(object):
                         grad_ss[m] = l0_expand
                     else:
                         grad_ss[m] = torch.cat((grad_ss[m], l0_expand), dim=0)
+                    del loss_T
+                    del t_simi
+                    del s_simi
+                    del log_simi
+                    del simi_knowledge
+                    del log_aug_output
+                    del aug_knowledge
+                    del loss_SS
                     del l0_grads
                     del l1_grads
                     del l0_expand
