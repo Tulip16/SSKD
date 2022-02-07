@@ -342,8 +342,9 @@ class LearnSoftMultiLambdaMeta(object):
 
                         out_vec = out_vec - (eta * torch.matmul(train_l1, comb_grad[self.num_classes:].\
                             view(self.num_classes, -1).transpose(0, 1)))
+                        del comb_grad
 
-                        # out_vec.requires_grad = True
+                        out_vec.requires_grad = True
 
                         loss_SL = self.criterion_red(out_vec, train_target)  # self.criterion(outputs, target).sum()
 
@@ -359,13 +360,21 @@ class LearnSoftMultiLambdaMeta(object):
 
                         combined = (0.75*up_grads_val+0.25*up_grads).T
                         combined_ss = (0.75*up_grads_val_ss+0.25*up_grads_ss).T
-                        
+                        del out_vec_val
+                        del out_vec
+                        del up_grads_val
+                        del up_grads
+                        del up_grads_ss
+                        del up_grads_val_ss
                        
                         one_index = (torch.arange(4*batch*self.fit) % 4 == 1)
                         two_index = (torch.arange(4*batch*self.fit) % 4 == 2)
                         three_index = (torch.arange(4*batch*self.fit) % 4 == 3)
                         grad_SS = (grad_ss[0][one_index]+grad_ss[0][two_index]+grad_ss[0][three_index])/3
                         grad_T = (grad_t[0][one_index]+grad_t[0][two_index]+grad_t[0][three_index])/3
+                        del one_index
+                        del two_index
+                        del three_index
 
                         alpha_grads_ss = torch.matmul(grad_SS, combined_ss)
                         alpha_grads_t = torch.matmul(grad_T, combined)
@@ -382,21 +391,33 @@ class LearnSoftMultiLambdaMeta(object):
                         lambdas.clamp_(min=1e-7,max=1-1e-7)
                         lambdas[batch_ind,0] = 1- torch.max(lambdas[batch_ind,1:],dim=1).values
                         
+                        del alpha_grads_ss
+                        del alpha_grads_t
+                        del alpha_grads
+                        del grad
+                        del grad_SS
+                        del grad_T
+                        del l0_grads
+                        del l1_grads
+                        del l0_expand
                     #print()#"End for loop")
-                    del alpha_grads_ss
-                    del alpha_grads_t
-                    del alpha_grads
-                    del grad
-                    del grad_SS
-                    del grad_T
-                    del loss_SL
-                    del loss_SS
-                    del loss_KD
-                    del loss_T
-                    del outputs
-                    del l0_grads
-                    del l1_grads
-                    del l0_expand
+                    try:
+                        del alpha_grads_ss
+                        del alpha_grads_t
+                        del alpha_grads
+                        del grad
+                        del grad_SS
+                        del grad_T
+                        del loss_SL
+                        del loss_SS
+                        del loss_KD
+                        del loss_T
+                        del outputs
+                        del l0_grads
+                        del l1_grads
+                        del l0_expand
+                    except:
+                        pass
             try:
                 del alpha_grads_ss
                 del alpha_grads_t
