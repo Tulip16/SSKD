@@ -73,9 +73,9 @@ class LearnSoftMultiLambdaMeta(object):
         lambdas = lam.cuda(0)#, device=self.device)
         lambdas_ss = lam_ss.cuda(0)#, device=self.device)
         lambdas_t = lam_t.cuda(0)#, device=self.device)
-        soft_lam = F.softmax(lambdas, dim=1)
-        soft_lam_ss = F.softmax(lambdas_ss, dim=1)
-        soft_lam_t = F.softmax(lambdas_t, dim=1)
+        #soft_lam = F.softmax(lambdas, dim=1)
+        #soft_lam_ss = F.softmax(lambdas_ss, dim=1)
+        #soft_lam_t = F.softmax(lambdas_t, dim=1)
 
         with torch.no_grad():
 
@@ -295,13 +295,10 @@ class LearnSoftMultiLambdaMeta(object):
                         #print("Before",lambdas[batch_ind[0]].item(),lambdas[batch_ind[-1]].item())
                         #print("soft lam", soft_lam[batch_ind,0][:,None].size())
                         #print("SL_grads", SL_grads.size())
-                        comb_grad = soft_lam[batch_ind,0][:,None]*SL_grads 
-                        #comb_grad = lambdas[batch_ind,0][:,None]*SL_grads
-                        #comb_grad_t = soft_lam_t[batch_ind,0][:,None]*grad_t[0]
-                        #comb_grad_ss = soft_lam_ss[batch_ind,0][:,None]*grad_ss[0]
+                        comb_grad = lambdas[batch_ind,0][:,None]*SL_grads 
 
                         for m in range(self.num_teachers):
-                            comb_grad += soft_lam[batch_ind,m+1][:,None]*KD_grads[m]
+                            comb_grad += lambdas[batch_ind,m+1][:,None]*KD_grads[m]
                             #comb_grad += lambdas[batch_ind,m+1][:,None]*KD_grads[m]
                         #for m in range(self.num_teachers - 1):
                             #comb_grad_t += soft_lam_t[batch_ind,m][:,None]*grad_t[m]
@@ -367,44 +364,24 @@ class LearnSoftMultiLambdaMeta(object):
                         one_index = (torch.arange(4*batch*self.fit) % 4 == 1)
                         two_index = (torch.arange(4*batch*self.fit) % 4 == 2)
                         three_index = (torch.arange(4*batch*self.fit) % 4 == 3)
-                        grad = ((1-soft_lam[batch_ind,0])*soft_lam[batch_ind,0])[:,None]*SL_grads
-                        grad_SS = ((1-soft_lam_ss[batch_ind,0])*soft_lam_ss[batch_ind,0])[:,None]*(grad_ss[0][one_index]+grad_ss[0][two_index]+grad_ss[0][three_index])/3
-                        grad_T = ((1-soft_lam_t[batch_ind,0])*soft_lam_t[batch_ind,0])[:,None]*(grad_t[0][one_index]+grad_t[0][two_index]+grad_t[0][three_index])/3
-
-                        #grad = SL_grads 
-                        for m_1 in range(self.num_teachers):
-                            grad -= (soft_lam[batch_ind,0]*soft_lam[batch_ind,m_1+1])[:,None]*KD_grads[m_1]
-                            #grad -= KD_grads[m_1]
-                        #for m_1 in range(self.num_teachers - 1):
-                        #grad_SS -= ((1-soft_lam_ss[batch_ind,0])*soft_lam_ss[batch_ind,0])[:,None]*grad_ss
-                        #grad_T -= ((1-soft_lam_t[batch_ind,0])*soft_lam_t[batch_ind,0])[:,None]*grad_t
-
-                        alpha_grads = torch.matmul(grad,combined)
-                        lambdas[batch_ind,0] = lambdas[batch_ind,0] +  500*eta*alpha_grads #9*eta*
+                        grad_SS = (grad_ss[0][one_index]+grad_ss[0][two_index]+grad_ss[0][three_index])/3
+                        grad_T = (grad_t[0][one_index]+grad_t[0][two_index]+grad_t[0][three_index])/3
 
                         alpha_grads_ss = torch.matmul(grad_SS, combined_ss)
                         alpha_grads_t = torch.matmul(grad_T, combined)
-                        lambdas_ss[batch_ind,0] = lambdas_ss[batch_ind,0] +  500*eta*alpha_grads_ss #9*eta*
-                        lambdas_t[batch_ind,0] = lambdas_t[batch_ind,0] +  500*eta*alpha_grads_t #9*eta*
+                        lambdas_ss[batch_ind,0] = lambdas_ss[batch_ind,0] +  100*eta*alpha_grads_ss #9*eta*
+                        lambdas_t[batch_ind,0] = lambdas_t[batch_ind,0] +  100*eta*alpha_grads_t #9*eta*
 
                         for m in range(self.num_teachers):
-                            grad = (-soft_lam[batch_ind,0]*soft_lam[batch_ind,m+1])[:,None]*SL_grads 
-                            #grad = -SL_grads 
-                            for m_1 in range(self.num_teachers):
-                                if m_1 == m:
-                                    grad += ((1-soft_lam[batch_ind,m_1+1])*soft_lam[batch_ind,m_1+1])[:,None]*KD_grads[m_1]
-                                    #grad += KD_grads[m_1]
-                                else:
-                                    grad -= (soft_lam[batch_ind,m+1]*soft_lam[batch_ind,m_1+1])[:,None]*KD_grads[m_1]
-                                    #grad -= KD_grads[m_1]
+                            grad = KD_grads[m] - SL_grads
+                           
                             alpha_grads = torch.matmul(grad,combined)
-                            lambdas[batch_ind,m+1] = lambdas[batch_ind,m+1] +  500*eta*alpha_grads #9*eta*
+                            lambdas[batch_ind,m] = lambdas[batch_ind,m] +  100*eta*alpha_grads #9*eta*
 
                         #print("After",lambdas[batch_ind[0]].item(),lambdas[batch_ind[-1]].item())
-                        #lambdas.clamp_(min=1e-7,max=1-1e-7)
-                        soft_lam[batch_ind, :] = F.softmax(lambdas[batch_ind, :], dim=1)
-                        soft_lam_ss[batch_ind, :] = F.softmax(lambdas_ss[batch_ind, :], dim=1)
-                        soft_lam_t[batch_ind, :] = F.softmax(lambdas_t[batch_ind, :], dim=1)
+                        lambdas.clamp_(min=1e-7,max=1-1e-7)
+                        lambdas[batch_ind,0] = 1- torch.max(lambdas[batch_ind,1:],dim=1).values
+                        
                     #print()#"End for loop")
                     del alpha_grads_ss
                     del alpha_grads_t
