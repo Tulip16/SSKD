@@ -332,9 +332,7 @@ class LearnSoftMultiLambdaMeta(object):
                         torch.cuda.empty_cache()
                         #print(torch.cuda.memory_summary(device=None, abbreviated=False))
                         #print(torch.cuda.memory_stats(device=None))
-                        if counter <= 10:
-                            print(torch.cuda.memory_allocated(device=None))
-                        counter += 1
+                        
                         up_grads_val = torch.cat((l0_grads, l1_grads), dim=1).sum(0)
                         up_grads_val_ss = self.init_l1.repeat(1, self.num_classes).cuda(0).sum(0)
 
@@ -358,7 +356,13 @@ class LearnSoftMultiLambdaMeta(object):
                         torch.cuda.empty_cache()
                         up_grads = torch.cat((l0_grads, l1_grads), dim=1).sum(0)
                         up_grads_ss = train_l1.repeat(1, self.num_classes).cuda(0).sum(0)
-
+                        
+                        
+                        if counter <= 10:
+                            print("before free")
+                            print(torch.cuda.memory_allocated(device=None))
+                        counter += 1
+                        
                         combined = (0.75*up_grads_val+0.25*up_grads).T
                         combined_ss = (0.75*up_grads_val_ss+0.25*up_grads_ss).T
                         del out_vec_val
@@ -368,6 +372,11 @@ class LearnSoftMultiLambdaMeta(object):
                         del up_grads_ss
                         del up_grads_val_ss
                         torch.cuda.empty_cache()
+                        
+                        if counter <= 10:
+                            print("after free")
+                            print(torch.cuda.memory_allocated(device=None))
+                        counter += 1
                        
                         one_index = (torch.arange(4*batch*self.fit) % 4 == 1)
                         two_index = (torch.arange(4*batch*self.fit) % 4 == 2)
@@ -403,6 +412,8 @@ class LearnSoftMultiLambdaMeta(object):
                         del l0_grads
                         del l1_grads
                         del l0_expand
+                        del loss_KD
+                        del loss_SL
                         torch.cuda.empty_cache()
                     #print()#"End for loop")
                     try:
