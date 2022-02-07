@@ -435,12 +435,8 @@ class LearnSoftMultiLambdaMeta(object):
                         lambdas.clamp_(min=1e-7,max=1-1e-7)
                         lambdas[batch_ind,0] = 1- torch.max(lambdas[batch_ind,1:],dim=1).values
                         
-                        del alpha_grads_ss
-                        del alpha_grads_t
-                        del alpha_grads
-                        del grad
-                        del grad_SS
-                        del grad_T
+                        
+                        
                         del l0_grads
                         del l1_grads
                         del l0_expand
@@ -463,6 +459,13 @@ class LearnSoftMultiLambdaMeta(object):
                         del l0_grads
                         del l1_grads
                         del l0_expand
+                        torch.cuda.empty_cache()
+                    except:
+                        pass
+                    try:
+                        del inputs
+                        del outputs
+                        del target
                         torch.cuda.empty_cache()
                     except:
                         pass
