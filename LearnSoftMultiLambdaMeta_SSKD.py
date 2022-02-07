@@ -412,7 +412,7 @@ class LearnSoftMultiLambdaMeta(object):
                         del l0_grads
                         del l1_grads
                         del l0_expand
-                        del loss_KD
+                        del loss_KD_val
                         del loss_SL
                         torch.cuda.empty_cache()
                     #print()#"End for loop")
