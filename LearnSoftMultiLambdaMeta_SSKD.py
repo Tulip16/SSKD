@@ -290,7 +290,7 @@ class LearnSoftMultiLambdaMeta(object):
 
 
                 if (batch_idx + 1) % self.fit == 0 or batch_idx + 1 == len(self.trainloader):
-                    print("new")
+                    #print("new")
                     for r in range(5):
                         #print("Before",lambdas[batch_ind[0]].item(),lambdas[batch_ind[-1]].item())
                         #print("soft lam", soft_lam[batch_ind,0][:,None].size())
