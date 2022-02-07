@@ -406,6 +406,21 @@ class LearnSoftMultiLambdaMeta(object):
                         soft_lam_ss[batch_ind, :] = F.softmax(lambdas_ss[batch_ind, :], dim=1)
                         soft_lam_t[batch_ind, :] = F.softmax(lambdas_t[batch_ind, :], dim=1)
                     #print()#"End for loop")
+                    del alpha_grads_ss
+                    del alpha_grads_t
+                    del alpha_grads
+                    del grad
+                    del grad_SS
+                    del grad_T
+                    del loss_SL
+                    del loss_SS
+                    del loss_KD
+                    del loss_T
+                    del outputs
+                    del l0_grads
+                    del l1_grads
+                    del l0_expand
+                
 
         #lambdas.clamp_(min=0.01,max=0.99)
         return lambdas.cuda(0), lambdas_ss.cuda(0), lambdas_t.cuda(0)
