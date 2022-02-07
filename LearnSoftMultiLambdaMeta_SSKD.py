@@ -343,6 +343,7 @@ class LearnSoftMultiLambdaMeta(object):
                         out_vec = out_vec - (eta * torch.matmul(train_l1, comb_grad[self.num_classes:].\
                             view(self.num_classes, -1).transpose(0, 1)))
                         del comb_grad
+                        torch.cuda.empty_cache()
 
                         #out_vec.requires_grad = True
 
@@ -366,6 +367,7 @@ class LearnSoftMultiLambdaMeta(object):
                         del up_grads
                         del up_grads_ss
                         del up_grads_val_ss
+                        torch.cuda.empty_cache()
                        
                         one_index = (torch.arange(4*batch*self.fit) % 4 == 1)
                         two_index = (torch.arange(4*batch*self.fit) % 4 == 2)
@@ -375,6 +377,7 @@ class LearnSoftMultiLambdaMeta(object):
                         del one_index
                         del two_index
                         del three_index
+                        torch.cuda.empty_cache()
 
                         alpha_grads_ss = torch.matmul(grad_SS, combined_ss)
                         alpha_grads_t = torch.matmul(grad_T, combined)
@@ -400,6 +403,7 @@ class LearnSoftMultiLambdaMeta(object):
                         del l0_grads
                         del l1_grads
                         del l0_expand
+                        torch.cuda.empty_cache()
                     #print()#"End for loop")
                     try:
                         del alpha_grads_ss
@@ -416,6 +420,7 @@ class LearnSoftMultiLambdaMeta(object):
                         del l0_grads
                         del l1_grads
                         del l0_expand
+                        torch.cuda.empty_cache()
                     except:
                         pass
             try:
@@ -434,6 +439,7 @@ class LearnSoftMultiLambdaMeta(object):
                 del l1_grads
                 del l0_expand
                 del alpha_grads_ss
+                torch.cuda.empty_cache()
             except:
                 pass
         try:
@@ -450,6 +456,7 @@ class LearnSoftMultiLambdaMeta(object):
             del l0_grads
             del l1_grads
             del l0_expand
+            torch.cuda.empty_cache()
         except:
             pass
                 
