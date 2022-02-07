@@ -344,7 +344,7 @@ class LearnSoftMultiLambdaMeta(object):
                             view(self.num_classes, -1).transpose(0, 1)))
                         del comb_grad
 
-                        out_vec.requires_grad = True
+                        #out_vec.requires_grad = True
 
                         loss_SL = self.criterion_red(out_vec, train_target)  # self.criterion(outputs, target).sum()
 
