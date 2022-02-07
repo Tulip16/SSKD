@@ -420,8 +420,25 @@ class LearnSoftMultiLambdaMeta(object):
                     del l0_grads
                     del l1_grads
                     del l0_expand
-
-            del alpha_grads_ss
+            try:
+                del alpha_grads_ss
+                del alpha_grads_t
+                del alpha_grads
+                del grad
+                del grad_SS
+                del grad_T
+                del loss_SL
+                del loss_SS
+                del loss_KD
+                del loss_T
+                del outputs
+                del l0_grads
+                del l1_grads
+                del l0_expand
+                del alpha_grads_ss
+            except:
+                pass
+        try:
             del alpha_grads_t
             del alpha_grads
             del grad
@@ -435,20 +452,8 @@ class LearnSoftMultiLambdaMeta(object):
             del l0_grads
             del l1_grads
             del l0_expand
-            del alpha_grads_ss
-        del alpha_grads_t
-        del alpha_grads
-        del grad
-        del grad_SS
-        del grad_T
-        del loss_SL
-        del loss_SS
-        del loss_KD
-        del loss_T
-        del outputs
-        del l0_grads
-        del l1_grads
-        del l0_expand
+        except:
+            pass
                 
 
         #lambdas.clamp_(min=0.01,max=0.99)
