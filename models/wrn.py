@@ -100,19 +100,35 @@ class WideResNet(nn.Module):
 
         return [bn1, bn2, bn3]
 
-    def forward(self, x, is_feat=False, preact=False, last=True):
-        out = self.conv1(x)
-        f0 = out
-        out = self.block1(out)
-        f1 = out
-        out = self.block2(out)
-        f2 = out
-        out = self.block3(out)
-        f3 = out
-        out = self.relu(self.bn1(out))
-        out = F.avg_pool2d(out, 8)
-        out = out.view(-1, self.nChannels)
-        f4 = out
+    def forward(self, x, is_feat=False, preact=False, last=True, freeze=False):
+        if freeze:
+             with torch.no_grad():
+                out = self.conv1(x)
+                f0 = out
+                out = self.block1(out)
+                f1 = out
+                out = self.block2(out)
+                f2 = out
+                out = self.block3(out)
+                f3 = out
+                out = self.relu(self.bn1(out))
+                out = F.avg_pool2d(out, 8)
+                out = out.view(-1, self.nChannels)
+                f4 = out
+        else:
+            out = self.conv1(x)
+            f0 = out
+            out = self.block1(out)
+            f1 = out
+            out = self.block2(out)
+            f2 = out
+            out = self.block3(out)
+            f3 = out
+            out = self.relu(self.bn1(out))
+            out = F.avg_pool2d(out, 8)
+            out = out.view(-1, self.nChannels)
+            f4 = out
+            
         out = self.fc(out)
         if is_feat:
             if preact:
@@ -126,6 +142,8 @@ class WideResNet(nn.Module):
             if last:
                 return out, f4
             return out
+
+               
 
 
 def wrn(**kwargs):
