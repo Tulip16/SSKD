@@ -120,7 +120,7 @@ class LearnSoftMultiLambdaMeta(object):
                 nor_index = (torch.arange(4*batch) % 4 == 0)
                 aug_index = (torch.arange(4*batch) % 4 != 0)
 
-                outputs, l1, s_feat, _ = self.model(inputs)
+                outputs, l1, s_feat, _ = self.model(inputs, freeze=True)
   
                 loss_SL = self.criterion_red(outputs[::4, :], target)  # self.criterion(outputs, target).sum()
 
