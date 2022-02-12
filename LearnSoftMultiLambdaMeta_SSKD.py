@@ -261,6 +261,7 @@ class LearnSoftMultiLambdaMeta(object):
 
                 if (batch_idx + 1) % self.fit == 0 or batch_idx + 1 == len(self.trainloader):
                     #print("new")
+                    print(torch.cuda.memory_allocated(device=None))
                     for r in range(5):
                         comb_grad = lambdas[batch_ind,0][:,None]*SL_grads 
 
@@ -308,13 +309,7 @@ class LearnSoftMultiLambdaMeta(object):
                         torch.cuda.empty_cache()
                         up_grads = torch.cat((l0_grads, l1_grads), dim=1).sum(0)
                         up_grads_ss = train_l1.repeat(1, self.num_classes).cuda(0).sum(0)
-                        
-                        
-                        if counter <= 10:
-                            print("before free")
-                            print(torch.cuda.memory_allocated(device=None))
-                        counter += 1
-                        
+
                         combined = (0.75*up_grads_val+0.25*up_grads).T
                         combined_ss = (0.75*up_grads_val_ss+0.25*up_grads_ss).T
                         del out_vec_val
@@ -324,12 +319,7 @@ class LearnSoftMultiLambdaMeta(object):
                         del up_grads_ss
                         del up_grads_val_ss
                         torch.cuda.empty_cache()
-                        
-                        if counter <= 10:
-                            print("after free")
-                            print(torch.cuda.memory_allocated(device=None))
-                        counter += 1
-                       
+
                         one_index = (torch.arange(4*batch*self.fit) % 4 == 1)
                         two_index = (torch.arange(4*batch*self.fit) % 4 == 2)
                         three_index = (torch.arange(4*batch*self.fit) % 4 == 3)
