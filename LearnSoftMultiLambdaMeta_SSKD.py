@@ -277,7 +277,7 @@ class LearnSoftMultiLambdaMeta(object):
                         out_vec_val = out_vec_val - (eta * torch.matmul(self.init_l1, comb_grad[self.num_classes:].\
                             view(self.num_classes, -1).transpose(0, 1)))
 
-                        #out_vec_val.requires_grad = True
+                        out_vec_val.requires_grad = True
                         '''loss_SL_val = self.criterion_red(out_vec_val, self.y_val)  # self.criterion(outputs, target).sum()
 
                         l0_grads = (torch.autograd.grad(loss_SL_val, out_vec_val)[0]).detach().clone().cuda(1)'''
