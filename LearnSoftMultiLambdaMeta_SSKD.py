@@ -300,7 +300,7 @@ class LearnSoftMultiLambdaMeta(object):
                         del comb_grad
                         torch.cuda.empty_cache()
 
-                        #out_vec.requires_grad = True
+                        out_vec.requires_grad = True
 
                         loss_SL = self.criterion_red(out_vec, train_target)  # self.criterion(outputs, target).sum()
                         l0_grads = (torch.autograd.grad(loss_SL, out_vec)[0]).detach().clone().cuda(0)
