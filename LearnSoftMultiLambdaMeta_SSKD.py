@@ -261,6 +261,7 @@ class LearnSoftMultiLambdaMeta(object):
 
                 if (batch_idx + 1) % self.fit == 0 or batch_idx + 1 == len(self.trainloader):
                     #print("new")
+                    print(batch_idx, end=": ")
                     print(torch.cuda.memory_allocated(device=None))
                     for r in range(5):
                         comb_grad = lambdas[batch_ind,0][:,None]*SL_grads 
