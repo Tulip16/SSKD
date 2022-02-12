@@ -100,7 +100,7 @@ class WideResNet(nn.Module):
 
         return [bn1, bn2, bn3]
 
-    def forward(self, x, is_feat=False, preact=False, last=True, freeze=False):
+    def forward(self, x, is_feat=False, preact=False, last=True, freeze=True):
         if freeze:
              with torch.no_grad():
                 out = self.conv1(x)
