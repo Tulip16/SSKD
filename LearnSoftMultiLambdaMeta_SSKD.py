@@ -320,10 +320,15 @@ class LearnSoftMultiLambdaMeta(object):
                         del up_grads_ss
                         del up_grads_val_ss
                         torch.cuda.empty_cache()
-
-                        one_index = (torch.arange(4*batch*self.fit) % 4 == 1)
-                        two_index = (torch.arange(4*batch*self.fit) % 4 == 2)
-                        three_index = (torch.arange(4*batch*self.fit) % 4 == 3)
+                        
+                        if (batch_idx + 1) % self.fit == 0:
+                            one_index = (torch.arange(4*batch*self.fit) % 4 == 1)
+                            two_index = (torch.arange(4*batch*self.fit) % 4 == 2)
+                            three_index = (torch.arange(4*batch*self.fit) % 4 == 3)
+                        else:
+                            one_index = (torch.arange(5*batch) % 4 == 1)
+                            two_index = (torch.arange(5*batch) % 4 == 2)
+                            three_index = (torch.arange(5*batch) % 4 == 3)
                         print("grad size: ", grad_ss.size())
                         grad_SS = (grad_ss[0][one_index]+grad_ss[0][two_index]+grad_ss[0][three_index])/3
                         grad_T = (grad_t[0][one_index]+grad_t[0][two_index]+grad_t[0][three_index])/3
