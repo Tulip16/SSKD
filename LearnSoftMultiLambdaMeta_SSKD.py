@@ -324,6 +324,7 @@ class LearnSoftMultiLambdaMeta(object):
                         one_index = (torch.arange(4*batch*self.fit) % 4 == 1)
                         two_index = (torch.arange(4*batch*self.fit) % 4 == 2)
                         three_index = (torch.arange(4*batch*self.fit) % 4 == 3)
+                        print("grad size: ", grad_ss.size())
                         grad_SS = (grad_ss[0][one_index]+grad_ss[0][two_index]+grad_ss[0][three_index])/3
                         grad_T = (grad_t[0][one_index]+grad_t[0][two_index]+grad_t[0][three_index])/3
                         del one_index
