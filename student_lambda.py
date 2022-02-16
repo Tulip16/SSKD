@@ -344,10 +344,14 @@ for epoch in range(args.epoch):
         # lambdas_t = None
         loss1 = F.cross_entropy(output[nor_index], target, reduction='none')
         loss2 = F.kl_div(log_nor_output, nor_knowledge, reduction='none') * args.kd_T * args.kd_T
+        loss2 = torch.mean(loss2,dim=0)
         loss3 = F.kl_div(log_aug_output[distill_index_tf], aug_knowledge[distill_index_tf], \
                         reduction='none') * args.tf_T * args.tf_T
+        loss3 = torch.mean(loss3,dim=0)
+        
         loss4 = F.kl_div(log_simi[distill_index_ss], simi_knowledge[distill_index_ss], \
                         reduction='none') * args.ss_T * args.ss_T
+        loss4 = torch.mean(loss4,dim=1)
 
         loss = lambdas[indices,0]*loss1
         
